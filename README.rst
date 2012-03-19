@@ -30,7 +30,7 @@ First we need to install the module:
 
 Installation through pip::
 
-    # pip install libweetwit
+    # pip install weetwit
     $ Copy the plugin to ~/.weechat/python
 
 Installation from source::
