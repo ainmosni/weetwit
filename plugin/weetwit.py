@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-19 13:34
+# Last Modified: 2012-03-19 22:02
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -39,7 +39,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.5"
+SCRIPT_VERSION      = "0.5.2"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -61,6 +61,7 @@ def print_to_buffer(message):
     """Prints a message to the private buffer."""
     buf = get_own_buffer()
     wc.prnt(buf, message)
+    wc.buffer_set(buf, "unread", "-")
 
 def print_error(message):
     """Prints a red error message to the current buffer."""
