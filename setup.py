@@ -7,20 +7,32 @@
 #
 # Creation Date: 2012-03-13
 #
-# Last Modified: 2012-03-19 16:38
+# Last Modified: 2012-03-19 21:33
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
+import os
 from distutils.core import setup
+
+# Utility function copied from the example project.
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name='weetwit',
-    version='0.5',
-    author='Daniël Franke',
+    version='0.5.1',
+    author=u'Daniël Franke',
     author_email='daniel@ams-sec.org',
     packages=['libweetwit'],
     scripts=['bin/timelined',],
     license='LICENSE.txt',
-    description='Support module for the weechat plugin "weetwit".',
-    long_description=open('README.rst').read(),
-    install_requires=["tweepy >= 1.8"])
+    keywords='weechat twitter',
+    url='https://github.com/ainmosni/weetwit',
+    description='Twitter suite for Weechat.',
+    long_description=read("README.rst"),
+    install_requires=["tweepy>=1.8"],
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Environment :: Console :: Curses",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: POSIX"])
 
