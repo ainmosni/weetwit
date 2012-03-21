@@ -104,6 +104,12 @@ timeline, this won't work.)
 FAQ
 ===
 
-**Q**: Why does your script spawn an extra python process?
-**A**: Because weechat doesn't support background threads, and blocks on long
-running operations, this process is what monitors your timeline.
+    :Q: Why does your script spawn an extra python process?
+    :A: Because weechat doesn't support background threads, and blocks on long
+        running operations, this process is what monitors your timeline.
+
+
+    :Q: I don't want those ugly STATUSIDs in my weetwit buffer.
+    :A: Add a filter like this: "/filter add statusid python.weetwit * \[#STATUSID:"
+        now you can toggle between them hidden and visible, depending on your
+        needs.

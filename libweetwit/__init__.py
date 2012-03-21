@@ -7,11 +7,11 @@
 #
 # Creation Date: 2012-02-21
 #
-# Last Modified: 2012-03-21 14:15
+# Last Modified: 2012-03-21 16:05
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 __author__ = 'Daniël Franke'
 __license__ = 'BSD'
 

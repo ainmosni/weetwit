@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-21 14:25
+# Last Modified: 2012-03-21 15:48
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -39,7 +39,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.6.0"
+SCRIPT_VERSION      = "0.6.1"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -55,13 +55,12 @@ def get_own_buffer():
 
 def print_to_current(message):
     """Prints a no logging message to the current buffer."""
-    wc.prnt_date_tags(wc.current_buffer(), 0, "nolog", message)
+    wc.prnt_date_tags(wc.current_buffer(), 0, "nolog,notify_status_update", message)
 
 def print_to_buffer(message):
     """Prints a message to the private buffer."""
     buf = get_own_buffer()
-    wc.prnt(buf, message)
-    wc.buffer_set(buf, "unread", "-")
+    wc.prnt_date_tags(buf, 0, "notify_message", message)
 
 def print_error(message):
     """Prints a red error message to the current buffer."""
@@ -119,7 +118,7 @@ def timeline_cb(data, remaining_calls):
                     tweet.txt))
 
             tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
-            print_to_buffer(u"""%s%s\t%s [%s]""" %
+            print_to_buffer(u"""%s%s\t%s\n[#STATUSID: %s]""" %
                 (tweep_color,
                 tweet.screen_name,
                 tweet.txt,
