@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-21 11:51
+# Last Modified: 2012-03-21 13:25
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -39,7 +39,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.5.2"
+SCRIPT_VERSION      = "0.5.3"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -108,9 +108,9 @@ def timeline_cb(data, remaining_calls):
                     wc.color("*cyan"),
                     tweet.txt))
 
-            print_to_buffer(u"""%s@%s%s\t%s [%s]""" %
-                (wc.color('green'),
-                wc.color('*cyan'),
+            tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
+            print_to_buffer(u"""%s%s\t%s [%s]""" %
+                (tweep_color,
                 tweet.screen_name,
                 tweet.txt,
                 tweet.id))
