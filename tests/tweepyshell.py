@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-09
 #
-# Last Modified: 2012-03-14 10:34
+# Last Modified: 2012-03-21 14:22
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -38,4 +38,7 @@ print twitter.api.me().name
 
 user = twitter.get_user("astrid")
 
+names = twitter.get_followed()
+for name in names:
+    print name
 ipdb.set_trace()

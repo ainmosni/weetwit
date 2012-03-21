@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-22
 #
-# Last Modified: 2012-03-15 08:26
+# Last Modified: 2012-03-21 14:02
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
@@ -84,6 +84,14 @@ class Twitter(object):
             raise TwitterError("Failed to get user: %s" % error)
         return user
 
+    def get_followed(self):
+        """Returns an array of screen_names that you follow."""
+        try:
+            followed = [u.screen_name for u in self.api.friends()]
+        except TweepError as error:
+            raise TwitterError("Faled to get followed: %s" % error)
+        return followed
+
     def __is_sane(self, message):
         """Does sanity checks to see if the status is valid."""
         message = self.__replace_urls(message)
@@ -111,3 +119,4 @@ class Twitter(object):
             new_message = new_message.replace(url, short_url)
 
         return new_message
+

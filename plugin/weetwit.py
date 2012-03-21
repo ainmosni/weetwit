@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-21 13:25
+# Last Modified: 2012-03-21 14:25
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -39,7 +39,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.5.3"
+SCRIPT_VERSION      = "0.6.0"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -70,6 +70,16 @@ def print_error(message):
 def print_success(message):
     """Prints a green success message to the current buffer."""
     print_to_current("%s%s" % (wc.color("*green"), message))
+
+def add_to_nicklist(nick):
+    """Add nick to the nicklist."""
+    wc.nicklist_add_nick(get_own_buffer(), "", nick, 'bar_fg', '', '', 1)
+
+def remove_from_nicklist(nick):
+    """Remove nick from the nicklist."""
+    nick_ptr = wc.nicklist_search_nick(get_own_buffer(), "", nick)
+    wc.nicklist_remove_nick(get_own_buffer(), nick_ptr)
+
 
 def display_tweet_details(tweet):
     """Displays details about a particular tweet."""
@@ -256,6 +266,7 @@ def follow_cb(data, buffer, args):
     except (TwitterError, tweepy.TweepError) as error:
         print_error(error)
         return wc.WEECHAT_RC_OK
+    add_to_nicklist(args)
     print_success("User @%s followed." % args)
     return wc.WEECHAT_RC_OK
 
@@ -268,6 +279,7 @@ def unfollow_cb(data, buffer, args):
     except (TwitterError, tweepy.TweepError) as error:
         print_error(error)
         return wc.WEECHAT_RC_OK
+    remove_from_nicklist(args)
     print_success("User @%s unfollowed." % args)
     return wc.WEECHAT_RC_OK
 
@@ -325,8 +337,10 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             value = "NULL"
         db.set_config(option, value)
 
+    followed = False
     try:
         twitter = Twitter(db=db)
+        followed = twitter.get_followed()
         loaded = True
     except TwitterError as error:
         print_error(error)
@@ -339,6 +353,11 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
         # We want to highlight on our screen_name.
         screen_name = twitter.api.me().screen_name
         wc.buffer_set(buf, "highlight_words", screen_name)
+        wc.buffer_set(buf, "nicklist", "1")
+
+        # Fill the nicklist with all followed tweeps.
+        for screen_name in followed:
+            add_to_nicklist(screen_name)
 
         # Find timelined
         timelined = which(wc.config_get_plugin("timelined_location"))
