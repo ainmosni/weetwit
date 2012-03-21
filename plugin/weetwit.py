@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-21 15:48
+# Last Modified: 2012-03-21 19:33
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -20,6 +20,8 @@ import sys
 
 import tweepy
 import weechat as wc
+
+import time
 
 # Very ugly hack to kill all unicode errors with fire.
 reload(sys)
@@ -39,7 +41,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.6.1"
+SCRIPT_VERSION      = "0.6.2"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -49,18 +51,26 @@ sys.setdefaultencoding('utf-8')
 twitter = False
 db = False
 
+def utcdt_to_lts(dt):
+    """Converts a UTC datetime object to a local timezone int."""
+    timestamp = time.mktime(dt.timetuple())
+    if time.localtime().tm_isdst:
+        timestamp += 3600
+    timestamp -= time.timezone
+    return timestamp
+
 def get_own_buffer():
     """Returns the ID of our own buffer"""
     return wc.buffer_search("python", "weetwit")
 
-def print_to_current(message):
+def print_to_current(message, timestamp=0):
     """Prints a no logging message to the current buffer."""
-    wc.prnt_date_tags(wc.current_buffer(), 0, "nolog,notify_status_update", message)
+    wc.prnt_date_tags(wc.current_buffer(), timestamp, "nolog,notify_status_update", message)
 
-def print_to_buffer(message):
+def print_to_buffer(message, timestamp=0):
     """Prints a message to the private buffer."""
     buf = get_own_buffer()
-    wc.prnt_date_tags(buf, 0, "notify_message", message)
+    wc.prnt_date_tags(buf, timestamp, "notify_message", message)
 
 def print_error(message):
     """Prints a red error message to the current buffer."""
@@ -115,14 +125,17 @@ def timeline_cb(data, remaining_calls):
                     (wc.color('*cyan'),
                     tweet.screen_name,
                     wc.color("*cyan"),
-                    tweet.txt))
+                    tweet.txt),
+                    timestamp=int(utcdt_to_lts(tweet.created_at)))
 
             tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
             print_to_buffer(u"""%s%s\t%s\n[#STATUSID: %s]""" %
                 (tweep_color,
                 tweet.screen_name,
                 tweet.txt,
-                tweet.id))
+                tweet.id),
+                timestamp=int(utcdt_to_lts(tweet.created_at)))
+
             db.set_last_tid(tweet.screen_name, tweet.id)
     except TwitterError as error:
         print_error(error)
@@ -354,6 +367,8 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
         wc.buffer_set(buf, "highlight_words", screen_name)
         wc.buffer_set(buf, "nicklist", "1")
 
+        # Add our own screen_name to the nicklist.
+        add_to_nicklist(screen_name)
         # Fill the nicklist with all followed tweeps.
         for screen_name in followed:
             add_to_nicklist(screen_name)

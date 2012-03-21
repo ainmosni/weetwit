@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-03-13
 #
-# Last Modified: 2012-03-21 16:05
+# Last Modified: 2012-03-21 19:32
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 import os
@@ -19,7 +19,7 @@ def read(fname):
 
 setup(
     name='weetwit',
-    version='0.6.1',
+    version='0.6.2',
     author=u'Daniël Franke',
     author_email='daniel@ams-sec.org',
     packages=['libweetwit'],
