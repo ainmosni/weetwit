@@ -7,13 +7,14 @@
 #
 # Creation Date: 2012-02-21
 #
-# Last Modified: 2012-03-14 22:44
+# Last Modified: 2012-03-21 11:11
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
 from tweepy.models import Status
 
 from libweetwit.utils import unescape
+from libweetwit.exceptions import TwitterError
 
 class Tweet(Status):
     """
@@ -32,11 +33,14 @@ class Tweet(Status):
             screen_name = status.retweeted_status.user.screen_name
             is_retweet = True
         except AttributeError:
-            tid = status.id
-            txt = status.text
-            name = status.user.name
-            screen_name = status.user.screen_name
-            is_retweet = False
+            try:
+                tid = status.id
+                txt = status.text
+                name = status.user.name
+                screen_name = status.user.screen_name
+                is_retweet = False
+            except AttributeError:
+                raise TwitterError("Not a valid tweet!")
         rtname = status.user.name
         rtscreen_name = status.user.screen_name
         setattr(status, 'tid', tid)

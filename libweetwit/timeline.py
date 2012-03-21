@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-03-05
 #
-# Last Modified: 2012-03-15 17:15
+# Last Modified: 2012-03-21 12:43
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -28,10 +28,11 @@ class TimeLineListener(StreamListener):
         Catch all the data and write it to loose files, we don't handle
         anything else.
         """
-        if ''',"event":"favorite"}''' in data:
-            return
+        # Filter out favourite events.
+        if '"event":"favorite"' in data:
+            pass
 
-        if 'in_reply_to_status_id' in data:
+        elif 'in_reply_to_status_id' in data:
             written = False
             while not written:
                 # We use the timestamp as the filename because we don't want to

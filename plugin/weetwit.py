@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-19 22:02
+# Last Modified: 2012-03-21 11:51
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -98,22 +98,25 @@ def timeline_cb(data, remaining_calls):
     show_in_cur = wc.config_get_plugin("show_in_current")
     status_dir = wc.config_get_plugin("storage_dir") + "/statuses/"
     # Use the normal id here so that we can look up who retweeted it.
-    for tweet in StatusMonitor(status_dir, twitter.api):
-        if wc.current_buffer() != buf and \
-            wc.config_string_to_boolean(show_in_cur):
-            print_to_current(u"""%s@%s\t%s%s""" %
-                (wc.color('*cyan'),
-                tweet.screen_name,
-                wc.color("*cyan"),
-                tweet.txt))
+    try:
+        for tweet in StatusMonitor(status_dir, twitter.api):
+            if wc.current_buffer() != buf and \
+                wc.config_string_to_boolean(show_in_cur):
+                print_to_current(u"""%s@%s\t%s%s""" %
+                    (wc.color('*cyan'),
+                    tweet.screen_name,
+                    wc.color("*cyan"),
+                    tweet.txt))
 
-        print_to_buffer(u"""%s@%s%s\t%s [%s]""" %
-            (wc.color('green'),
-            wc.color('*cyan'),
-            tweet.screen_name,
-            tweet.txt,
-            tweet.id))
-        db.set_last_tid(tweet.screen_name, tweet.id)
+            print_to_buffer(u"""%s@%s%s\t%s [%s]""" %
+                (wc.color('green'),
+                wc.color('*cyan'),
+                tweet.screen_name,
+                tweet.txt,
+                tweet.id))
+            db.set_last_tid(tweet.screen_name, tweet.id)
+    except TwitterError as error:
+        print_error(error)
     return wc.WEECHAT_RC_OK
 
 def storage_cb(data, option, value):
