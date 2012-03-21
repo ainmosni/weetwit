@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-03-13
 #
-# Last Modified: 2012-03-13 22:41
+# Last Modified: 2012-03-21 11:52
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -16,6 +16,7 @@ import json
 import os
 
 from libweetwit.tweet import Tweet
+from libweetwit.exceptions import TwitterError
 
 class StatusMonitor(object):
     """
@@ -43,3 +44,6 @@ class StatusMonitor(object):
             return status
         except IndexError:
             raise StopIteration()
+        except TwitterError as error:
+            os.unlink(status_file)
+            raise TwitterError(str(error))
