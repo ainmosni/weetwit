@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-12
 #
-# Last Modified: 2012-02-21 18:09
+# Last Modified: 2012-03-25 11:36
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -32,6 +32,11 @@ from libweetwit.utils import kill_process
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+# Size of the stream buffer, set to bitewise by default to keep realtime feel
+# on quiet twitter feeds.
+# If timelined becomes too CPU intensive, set this higher.
+# TODO: Make this an autodetectable amount.
+BUFFER_SIZE = 1
 
 
 # VERY messy for now.
@@ -87,7 +92,8 @@ while do_stream:
     # If it exits normally, we want to quit.
     do_stream = False
     try:
-        stream = Stream(auth=auth, listener=TimeLineListener(status_dir))
+        stream = Stream(auth=auth, listener=TimeLineListener(status_dir),
+                buffer_size=BUFFER_SIZE)
         stream.userstream()
     except (IncompleteRead, SSLError, socket.error):
         # If the stream quites unexpectedly, try again.
