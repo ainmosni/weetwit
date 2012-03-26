@@ -59,7 +59,7 @@ if not os.path.isdir(storage):
     print "%s is not a directory." % storage
     sys.exit(3)
 
-status_dir = storage + "/statuses"
+status_dir = storage + "/timelined"
 
 if track_list:
     track_hash = md5(track_list[0]).hexdigest()
@@ -78,6 +78,7 @@ if track_hash:
     pidfile = storage + "/" + track_hash + ".pid"
 
 
+# Make sure this timelined is not already running.
 if os.path.exists(pidfile):
     with file(pidfile) as f:
         kill_process(int(f.read().rstrip()))
