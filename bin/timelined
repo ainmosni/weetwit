@@ -13,13 +13,12 @@
 
 import sys
 import os
-import logging
-import logging.handlers
 import socket
 import time
 
 from httplib import IncompleteRead
 from ssl import SSLError
+from hashlib import md5
 
 from tweepy import Stream, OAuthHandler
 
@@ -39,19 +38,33 @@ sys.setdefaultencoding('utf-8')
 BUFFER_SIZE = 1
 
 
+# Placeholder for the list of stuff we might search for.
+track_list = False
+track_hash = False
+
 # VERY messy for now.
 # TODO: Clean up.
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print "No storage directory given."
     sys.exit(2)
 
 storage = sys.argv[1]
+
+# If we have any more arguments, we want to search for these.
+# Note that we we only do one search argument per stream.
+if len(sys.argv) > 2:
+    track_list = [" ".join(sys.argv[2:])]
 
 if not os.path.isdir(storage):
     print "%s is not a directory." % storage
     sys.exit(3)
 
 status_dir = storage + "/statuses"
+
+if track_list:
+    track_hash = md5(track_list[0]).hexdigest()
+    status_dir = storage + "/" + track_hash
+
 if not os.path.exists(status_dir):
     os.mkdir(status_dir)
 
@@ -59,16 +72,12 @@ if not os.path.isdir(status_dir):
     print "%s is not a directory." % status_dir
     sys.exit(4)
 
-# Set up logger
-logfile = "%s/timelined.log" % storage
-logger = logging.getLogger('timelined')
-logger.setLevel(logging.INFO)
+pidfile = storage + "/timelined.pid"
 
-fh = logging.handlers.RotatingFileHandler(logfile, maxBytes=1024*1024,
-        backupCount=5)
-logger.addHandler(fh)
+if track_hash:
+    pidfile = storage + "/" + track_hash + ".pid"
 
-pidfile = "%s/timelined.pid" % storage
+
 if os.path.exists(pidfile):
     with file(pidfile) as f:
         kill_process(int(f.read().rstrip()))
@@ -83,6 +92,7 @@ ck = db.get_config('consumer_key')
 cs = db.get_config('consumer_secret')
 at = db.get_config('access_token')
 ats = db.get_config('access_token_secret')
+
 auth = OAuthHandler(ck, cs)
 auth.set_access_token(at, ats)
 
@@ -94,10 +104,12 @@ while do_stream:
     try:
         stream = Stream(auth=auth, listener=TimeLineListener(status_dir),
                 buffer_size=BUFFER_SIZE)
-        stream.userstream()
+        if track_list:
+            stream.filter(track=track_list)
+        else:
+            stream.userstream()
     except (IncompleteRead, SSLError, socket.error):
         # If the stream quites unexpectedly, try again.
-        logger.info("The stream stopped unexpectedly, restarting.")
         do_stream = True
         # Sleep for one second so that we don't hammer the server.
         time.sleep(1)

@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-03-02
 #
-# Last Modified: 2012-03-14 10:33
+# Last Modified: 2012-03-26 12:48
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
@@ -15,9 +15,6 @@
 import htmlentitydefs
 import re
 import os
-
-import logging
-
 
 ##
 # Removes HTML or XML character references and entities from a text string.
@@ -52,11 +49,9 @@ def unescape(text):
 
 def kill_process(pid):
     """Kills pid in no matter what."""
-    logging.getLogger('timelined').addHandler(logging.NullHandler())
     try:
         os.kill(pid, 0)
     except OSError:
-        logging.info("Process wasn't running.")
         return True
 
     os.kill(pid, 15)
@@ -64,7 +59,6 @@ def kill_process(pid):
     try:
        os.kill(pid, 0)
     except OSError:
-       logging.info("Process cleanly killed")
        return True
 
     os.kill(pid, 9)
@@ -72,7 +66,6 @@ def kill_process(pid):
     try:
         os.kill(pid, 0)
     except OSError:
-        logging.info("Process forcefully killed.")
         raise Exception("Zombie alert!")
 
 # Copyright (c) 2001-2004 Twisted Matrix Laboratories.
