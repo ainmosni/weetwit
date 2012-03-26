@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-26 12:57
+# Last Modified: 2012-03-26 23:33
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -17,11 +17,13 @@
 
 import os
 import sys
+import time
+
+from hashlib import md5
 
 import tweepy
 import weechat as wc
 
-import time
 
 # Very ugly hack to kill all unicode errors with fire.
 reload(sys)
@@ -32,7 +34,7 @@ try:
     from libweetwit.twitter import Twitter
     from libweetwit.exceptions import TwitterError
     from libweetwit.statusmonitor import StatusMonitor
-    from libweetwit.utils import which
+    from libweetwit.utils import which, kill_process
 except ImportError:
     raise Exception(
       "Can't load needed modules, please install the libweetwit package!"
@@ -48,8 +50,13 @@ SCRIPT_DESC         = "Full twitter suite for Weechat."
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+# Some global objects
 twitter = False
 db = False
+user = False
+hooks = {}
+tlid = {}
+buffers = {}
 
 def utcdt_to_lts(dt):
     """Converts a UTC datetime object to a local timezone int."""
@@ -59,17 +66,12 @@ def utcdt_to_lts(dt):
     timestamp -= time.timezone
     return timestamp
 
-def get_own_buffer():
-    """Returns the ID of our own buffer"""
-    return wc.buffer_search("python", "weetwit")
-
 def print_to_current(message, timestamp=0):
     """Prints a no logging message to the current buffer."""
     wc.prnt_date_tags(wc.current_buffer(), timestamp, "nolog,notify_status_update", message)
 
-def print_to_buffer(message, timestamp=0):
+def print_to_buffer(buf, message, timestamp=0):
     """Prints a message to the private buffer."""
-    buf = get_own_buffer()
     wc.prnt_date_tags(buf, timestamp, "notify_message", message)
 
 def print_error(message):
@@ -80,14 +82,14 @@ def print_success(message):
     """Prints a green success message to the current buffer."""
     print_to_current("%s%s" % (wc.color("*green"), message))
 
-def add_to_nicklist(nick):
+def add_to_nicklist(buf, nick):
     """Add nick to the nicklist."""
-    wc.nicklist_add_nick(get_own_buffer(), "", nick, 'bar_fg', '', '', 1)
+    wc.nicklist_add_nick(buf, "", nick, 'bar_fg', '', '', 1)
 
-def remove_from_nicklist(nick):
+def remove_from_nicklist(buf, nick):
     """Remove nick from the nicklist."""
-    nick_ptr = wc.nicklist_search_nick(get_own_buffer(), "", nick)
-    wc.nicklist_remove_nick(get_own_buffer(), nick_ptr)
+    nick_ptr = wc.nicklist_search_nick(buf, "", nick)
+    wc.nicklist_remove_nick(buf, nick_ptr)
 
 
 def display_tweet_details(tweet):
@@ -107,15 +109,20 @@ def display_tweet_details(tweet):
 
 
 
-def timeline_cb(data, remaining_calls):
+def display_cb(data, remaining_calls):
     """
-    Displays the timeline.
+    Displays the timeline
     """
     global db
     global twitter
-    buf = get_own_buffer()
-    show_in_cur = wc.config_get_plugin("show_in_current")
-    status_dir = wc.config_get_plugin("storage_dir") + "/statuses/"
+    global buffers
+    global tlid
+    show_in_cur = "Off"
+    buf = buffers[data]
+    # I have NO idea why is doesn't work here but this does so... what?
+    if "__TIMELINE" in data:
+        show_in_cur = wc.config_get_plugin("show_in_current")
+    status_dir = wc.config_get_plugin("storage_dir") + "/" + tlid[data] + "/"
     # Use the normal id here so that we can look up who retweeted it.
     try:
         for tweet in StatusMonitor(status_dir, twitter.api):
@@ -129,7 +136,7 @@ def timeline_cb(data, remaining_calls):
                     timestamp=int(utcdt_to_lts(tweet.created_at)))
 
             tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
-            print_to_buffer(u"""%s%s\t%s\n[#STATUSID: %s]""" %
+            print_to_buffer(buf, u"""%s%s\t%s\n[#STATUSID: %s]""" %
                 (tweep_color,
                 tweet.screen_name,
                 tweet.txt,
@@ -272,28 +279,38 @@ def show_user_cb(data, buffer, args):
 def follow_cb(data, buffer, args):
     """Follows @user."""
     global twitter
+    global buffers
     try:
         user = twitter.get_user(args)
         user.follow()
     except (TwitterError, tweepy.TweepError) as error:
         print_error(error)
         return wc.WEECHAT_RC_OK
-    add_to_nicklist(args)
+    add_to_nicklist(buffers['__TIMELINE'], args)
     print_success("User @%s followed." % args)
     return wc.WEECHAT_RC_OK
 
 def unfollow_cb(data, buffer, args):
     """Unfollows @user."""
     global twitter
+    global buffers
     try:
         user = twitter.get_user(args)
         user.unfollow()
     except (TwitterError, tweepy.TweepError) as error:
         print_error(error)
         return wc.WEECHAT_RC_OK
-    remove_from_nicklist(args)
+    remove_from_nicklist(buffers['__TIMELINE'], args)
     print_success("User @%s unfollowed." % args)
     return wc.WEECHAT_RC_OK
+
+def search_cb(data, buffer, args):
+    """The command to use for realtime search."""
+    timelined = data
+    print_to_current(args)
+    setup_timeline(timelined, search=args)
+    return wc.WEECHAT_RC_OK
+    
 
 
 def timelined_cb(data, command, rc, stdout, stderr):
@@ -307,18 +324,88 @@ def timelined_cb(data, command, rc, stdout, stderr):
 
     return wc.WEECHAT_RC_OK
 
+
+def stop_timelined(prefix, buffer):
+    """Unhooks the specified timeline hook."""
+    global hooks
+    global tlid
+    # We have two hooks to unhook per window.
+    stream = prefix + "STREAM"
+    display = prefix + "DISPLAY"
+    wc.unhook(hooks[stream])
+    wc.unhook(hooks[display])
+
+    # Kill timelined
+    storage_dir = wc.config_get_plugin("storage_dir")
+    pidfile = storage_dir + "/" + tlid[prefix] + ".pid"
+    if os.path.exists(pidfile) and os.path.isfile(pidfile):
+        with file(pidfile) as f:
+            kill_process(int(f.read().rstrip()))
+    # Remove the pidfile.
+    os.unlink(pidfile)
+    return wc.WEECHAT_RC_OK
+
+def setup_timeline(timelined, followed=False, search=False):
+    """Sets up the main timeline window."""
+    global hooks
+    global user
+    global tlid
+    global buffers
+    if not search:
+        name = "timeline"
+        title = "Timelined for %s" % user.screen_name
+        prefix = "__TIMELINE"
+        search = False
+    else:
+        name = search
+        title = "Twitter search for %s" % search
+        prefix = md5(search).hexdigest()
+    # TODO: make tweeting nicer from this buffer.
+    buf = wc.buffer_new(name, "", "", "stop_timelined", prefix)
+    # Some naming
+    wc.buffer_set(buf, "title", title)
+
+    # We want mentions to highlight.
+    wc.buffer_set(buf, "highlight_words", user.screen_name)
+
+    if followed:
+        # We want a nicklist to hold everyone we follow.
+        wc.buffer_set(buf, "nicklist", "1")
+        add_to_nicklist(buf, user.screen_name)
+
+        for screen_name in followed:
+            add_to_nicklist(buf, screen_name)
+
+    storage_dir = wc.config_get_plugin("storage_dir")
+    command = timelined + " " + storage_dir
+    if search:
+        command += " '%s'" % search
+    print_to_current(command)
+    timelinestream_hook = wc.hook_process(
+        command,
+        0, "timelined_cb", "")
+
+    strkey = prefix + "STREAM"
+    hooks[strkey] = timelinestream_hook
+
+    # Check if there are new timeline entries every second.
+    timelinedisplay_hook = wc.hook_timer(1 * 1000, 60, 0, "display_cb",
+        prefix)
+    diskey = prefix + "DISPLAY"
+    hooks[diskey] = timelinedisplay_hook
+    if search:
+        wc.buffer_set(buf, "display", "1")
+    buffers[prefix] = buf
+
+    if prefix is "__TIMELINE":
+        tlid[prefix] = "timelined"
+    else:
+        tlid[prefix] = prefix
+
 if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
-        SCRIPT_DESC, "", ""):
+        SCRIPT_DESC, "shutdown_cb", ""):
 
     loaded = False
-
-    # Check if our buffer exists and if not, create it.
-    buf = get_own_buffer()
-    if not "0x" in buf:
-        buf = wc.buffer_new("weetwit", "", "", "", "")
-        wc.buffer_set(buf, "title", "Timeline")
-
-
 
     # Default options
     default_storage = wc.info_get("weechat_dir", '') + "/weetwit/"
@@ -363,15 +450,7 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
 
     if loaded:
         # We want to highlight on our screen_name.
-        screen_name = twitter.api.me().screen_name
-        wc.buffer_set(buf, "highlight_words", screen_name)
-        wc.buffer_set(buf, "nicklist", "1")
-
-        # Add our own screen_name to the nicklist.
-        add_to_nicklist(screen_name)
-        # Fill the nicklist with all followed tweeps.
-        for screen_name in followed:
-            add_to_nicklist(screen_name)
+        user = twitter.api.me()
 
         # Find timelined
         timelined = which(wc.config_get_plugin("timelined_location"))
@@ -380,14 +459,10 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
                 "Couldn't find timelined, please set 'plugins.var.python.weetwit.timelined"
             )
 
-        # Get the python binary location and start timelined.
-        python2_bin = wc.info_get('python2_bin', '') or 'python'
-        weetwit_hook_process = wc.hook_process(
-            python2_bin + " " + timelined[0]  +  " " + storage_dir,
-            0, "timelined_cb", "")
+        tl = timelined[0]
 
-        # Check if there are new timeline entries every second.
-        wc.hook_timer(1 * 1000, 60, 0, "timeline_cb", "")
+        setup_timeline(tl, followed=followed)
+
 
         # Config change hook.
         wc.hook_config("plugins.var.python." + SCRIPT_NAME + ".*",
@@ -441,3 +516,9 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "The @username of the user you to unfollow.",
             "",
             "unfollow_cb", "")
+
+        hook = wc.hook_command("tsearch", "Search twitter for something.",
+            "search terms",
+            "The terms to search for.",
+            "",
+            "search_cb", tl)
