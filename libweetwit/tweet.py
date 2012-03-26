@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-21
 #
-# Last Modified: 2012-03-21 11:11
+# Last Modified: 2012-03-26 09:18
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -68,7 +68,7 @@ class Tweet(Status):
             try:
                 replacement = "%s [%s]" % (url['display_url'], url['url'])
                 text = text.replace(url['url'], replacement)
-            except TypeError:
+            except (TypeError, KeyError):
                 pass
         return text
 
