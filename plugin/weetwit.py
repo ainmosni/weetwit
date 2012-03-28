@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-26 23:33
+# Last Modified: 2012-03-28 16:15
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -122,7 +122,8 @@ def display_cb(data, remaining_calls):
     # I have NO idea why is doesn't work here but this does so... what?
     if "__TIMELINE" in data:
         show_in_cur = wc.config_get_plugin("show_in_current")
-    status_dir = wc.config_get_plugin("storage_dir") + "/" + tlid[data] + "/"
+    status_dir = os.path.join(wc.config_get_plugin("storage_dir"),
+            tlid[data])
     # Use the normal id here so that we can look up who retweeted it.
     try:
         for tweet in StatusMonitor(status_dir, twitter.api):
@@ -307,23 +308,21 @@ def unfollow_cb(data, buffer, args):
 def search_cb(data, buffer, args):
     """The command to use for realtime search."""
     timelined = data
-    print_to_current(args)
     setup_timeline(timelined, search=args)
     return wc.WEECHAT_RC_OK
-    
-
 
 def timelined_cb(data, command, rc, stdout, stderr):
     """Very generic callback in case timelined acts weird."""
-    print_to_current("%s***TIMELINED OUTPUT***" % wc.color("*red"))
-    print_to_current("%sData\t%s" % (wc.color("*red"), data))
-    print_to_current("%sCommand\t%s" % (wc.color("*red"), command))
-    print_to_current("%sRC\t%s" % (wc.color("*red"), rc))
-    print_to_current("%sStdout\t%s" % (wc.color("*red"), stdout))
-    print_to_current("%sStderr\t%s" % (wc.color("*red"), stderr))
-
+    global buffers
+    buf = buffers[data]
+    name = wc.buffer_get_string(buf, "name")
+    stream = data + "STREAM"
+    del(hooks[stream])
+    wc.buffer_close(buf)
+    print_error("timelined for %s exited:" % name)
+    print_error(stdout)
+    print_error(stderr)
     return wc.WEECHAT_RC_OK
-
 
 def stop_timelined(prefix, buffer):
     """Unhooks the specified timeline hook."""
@@ -332,12 +331,14 @@ def stop_timelined(prefix, buffer):
     # We have two hooks to unhook per window.
     stream = prefix + "STREAM"
     display = prefix + "DISPLAY"
-    wc.unhook(hooks[stream])
+    if stream in hooks:
+        wc.unhook(hooks[stream])
+
     wc.unhook(hooks[display])
 
     # Kill timelined
     storage_dir = wc.config_get_plugin("storage_dir")
-    pidfile = storage_dir + "/" + tlid[prefix] + ".pid"
+    pidfile = os.path.join(storage_dir, tlid[prefix] + ".pid")
     if os.path.exists(pidfile) and os.path.isfile(pidfile):
         with file(pidfile) as f:
             kill_process(int(f.read().rstrip()))
@@ -380,10 +381,9 @@ def setup_timeline(timelined, followed=False, search=False):
     command = timelined + " " + storage_dir
     if search:
         command += " '%s'" % search
-    print_to_current(command)
     timelinestream_hook = wc.hook_process(
         command,
-        0, "timelined_cb", "")
+        0, "timelined_cb", prefix)
 
     strkey = prefix + "STREAM"
     hooks[strkey] = timelinestream_hook
@@ -408,7 +408,7 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
     loaded = False
 
     # Default options
-    default_storage = wc.info_get("weechat_dir", '') + "/weetwit/"
+    default_storage = os.path.join(wc.info_get("weechat_dir", ''), "weetwit")
     script_options = {
             "storage_dir" : default_storage,
             "consumer_key" : "",

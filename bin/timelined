@@ -25,6 +25,7 @@ from tweepy import Stream, OAuthHandler
 from libweetwit.db import DB
 from libweetwit.timeline import TimeLineListener
 from libweetwit.utils import kill_process
+from libweetwit.exceptions import TwitterError
 
 
 # Very ugly hack to dodge a lot of unicode problems.
@@ -59,11 +60,11 @@ if not os.path.isdir(storage):
     print "%s is not a directory." % storage
     sys.exit(3)
 
-status_dir = storage + "/timelined"
+status_dir = os.path.join(storage,  "timelined")
 
 if track_list:
     track_hash = md5(track_list[0]).hexdigest()
-    status_dir = storage + "/" + track_hash
+    status_dir = os.path.join(storage, track_hash)
 
 if not os.path.exists(status_dir):
     os.mkdir(status_dir)
@@ -72,10 +73,10 @@ if not os.path.isdir(status_dir):
     print "%s is not a directory." % status_dir
     sys.exit(4)
 
-pidfile = storage + "/timelined.pid"
+pidfile = os.path.join(storage, "timelined.pid")
 
 if track_hash:
-    pidfile = storage + "/" + track_hash + ".pid"
+    pidfile = os.path.join(storage, track_hash + ".pid")
 
 
 # Make sure this timelined is not already running.
@@ -104,7 +105,7 @@ while do_stream:
     do_stream = False
     try:
         stream = Stream(auth=auth, listener=TimeLineListener(status_dir),
-                buffer_size=BUFFER_SIZE)
+                buffer_size=BUFFER_SIZE, retry_count=10)
         if track_list:
             stream.filter(track=track_list)
         else:
@@ -114,3 +115,6 @@ while do_stream:
         do_stream = True
         # Sleep for one second so that we don't hammer the server.
         time.sleep(1)
+    except TwitterError as error:
+        sys.stderr.write(str(error))
+        sys.exit(1)
