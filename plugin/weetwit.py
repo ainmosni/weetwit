@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-28 16:15
+# Last Modified: 2012-03-28 20:32
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -118,31 +118,34 @@ def display_cb(data, remaining_calls):
     global buffers
     global tlid
     show_in_cur = "Off"
-    buf = buffers[data]
+    valid_buffers = []
+    valid_buffers.append(buffers[data])
+    current_buffer = wc.current_buffer()
+    show_in_cur = wc.config_string_to_boolean(wc.config_get_plugin("show_in_current"))
+
     # I have NO idea why is doesn't work here but this does so... what?
-    if "__TIMELINE" in data:
-        show_in_cur = wc.config_get_plugin("show_in_current")
+    if "__TIMELINE" in data and show_in_cur and buffers[data] != current_buffer:
+        valid_buffers.append(current_buffer)
     status_dir = os.path.join(wc.config_get_plugin("storage_dir"),
             tlid[data])
-    # Use the normal id here so that we can look up who retweeted it.
     try:
         for tweet in StatusMonitor(status_dir, twitter.api):
-            if wc.current_buffer() != buf and \
-                wc.config_string_to_boolean(show_in_cur):
-                print_to_current(u"""%s@%s\t%s%s""" %
-                    (wc.color('*cyan'),
-                    tweet.screen_name,
-                    wc.color("*cyan"),
-                    tweet.txt),
-                    timestamp=int(utcdt_to_lts(tweet.created_at)))
 
             tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
-            print_to_buffer(buf, u"""%s%s\t%s\n[#STATUSID: %s]""" %
-                (tweep_color,
-                tweet.screen_name,
-                tweet.txt,
-                tweet.id),
-                timestamp=int(utcdt_to_lts(tweet.created_at)))
+            for buf in valid_buffers:
+                screen_name = tweep_color + tweet.screen_name
+                text = tweet.txt
+                if buf is current_buffer:
+                    cur_color = wc.color(wc.config_get_plugin("current_color"))
+                    screen_name = cur_color + "@" + screen_name
+                    text = cur_color + text
+                output = u"%s\t%s" % \
+                    (screen_name, text)
+                if tweet.is_retweet:
+                    output += " (RT by @%s)" % tweet.rtscreen_name
+                output += "\n[#STATUSID: %s]" % tweet.id
+
+                print_to_buffer(buf, output)
 
             db.set_last_tid(tweet.screen_name, tweet.id)
     except TwitterError as error:
@@ -354,7 +357,7 @@ def setup_timeline(timelined, followed=False, search=False):
     global buffers
     if not search:
         name = "timeline"
-        title = "Timelined for %s" % user.screen_name
+        title = "%s's timeline" % user.screen_name
         prefix = "__TIMELINE"
         search = False
     else:
@@ -416,6 +419,7 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "access_token" : "",
             "access_token_secret" : "",
             "show_in_current" : "false",
+            "current_color" : "cyan",
             "timelined_location" : "timelined"
     }
     for option, default_value in script_options.iteritems():

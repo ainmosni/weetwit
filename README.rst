@@ -89,6 +89,11 @@ timeline, this won't work.)
     - Retweets the relevant status update, if [message] is present this will
       prepended to the retweet.
 
+* \/tsearch <keywords>
+    - Opens a new buffer with a realtime search of <keywords>, you can only
+      have a limited amount open of these at one time, opening more might stop
+      already existing searches.
+
 * \/tshare <status identification>
     - Shares the relevant status update with the current IRC channel.
 
@@ -110,6 +115,6 @@ FAQ
 
 
     :Q: I don't want those ugly STATUSIDs in my weetwit buffer.
-    :A: Add a filter like this: "/filter add statusid python.weetwit * \[#STATUSID:"
+    :A: Add a filter like this: "/filter add statusid python.weetwit * \\[#STATUSID:"
         now you can toggle between them hidden and visible, depending on your
         needs.
