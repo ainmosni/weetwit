@@ -108,13 +108,13 @@ timeline, this won't work.)
 * \/tunfollow <screen_name>
     - Unfollows screen_name.
 
-* \/travail
-  - Displays woeids of available trend locations.
-
 * \/trending [woeid]
-  - Displays what's trending in the location represented by [woeid].
-    If no woeid present it uses the woeid set at
-    plugins.var.python.weetwit.trend_woeid.
+    - Displays what's trending in the location represented by [woeid].
+      If no woeid present it uses the woeid set at
+      plugins.var.python.weetwit.trend_woeid.
+
+* \/travail
+    - Displays woeids of available trend locations.
 
 FAQ
 ===

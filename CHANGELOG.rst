@@ -7,7 +7,7 @@ Changelog
 * Changed displayed timestamps to when the tweet was created.
 * Added the user's own screen_name to the nicklist.
 
-0.7.0 (NOT RELEASED)
+0.7.0 (2012-04-03)
 ++++++++++++++++++++
 
 * Added realtime search.
