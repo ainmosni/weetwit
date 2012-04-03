@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-03 15:39
+# Last Modified: 2012-04-03 17:26
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -332,6 +332,29 @@ def trends_available_cb(data, buffer, args):
         print_to_current("\n")
     return wc.WEECHAT_RC_OK
 
+def trends_cb(data, buffer, args):
+    """
+    Gets the trend for woeid or, if absent the trends for the configured woeid.
+    """
+    global twitter
+    woeid = wc.config_get_plugin("trend_woeid")
+    if args:
+        woeid = args
+    try:
+        trends = twitter.get_trends(woeid)
+    except TwitterError as error:
+        print_error("Failed getting trends" % error)
+
+    print_to_current("%s-------------------" % wc.color("magenta"))
+    header = "%sTrending " % wc.color("*cyan")
+    if trends[0] != "Worldwide":
+        header += "in "
+    header += trends[0]
+    print_to_current(header)
+    for trend in trends[1:]:
+        print_to_current(trend)
+    print_to_current("%s-------------------" % wc.color("magenta"))
+    return wc.WEECHAT_RC_OK
 
 def search_cb(data, buffer, args):
     """The command to use for realtime search."""
@@ -446,7 +469,8 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "access_token_secret" : "",
             "show_in_current" : "false",
             "current_color" : "cyan",
-            "timelined_location" : "timelined"
+            "timelined_location" : "timelined",
+            "trend_woeid" : "1"
     }
     for option, default_value in script_options.iteritems():
          if not wc.config_is_set_plugin(option):
@@ -557,4 +581,10 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "",
             "",
             "",
-            "trends_available_cb", tl)
+            "trends_available_cb", "")
+
+        hook = wc.hook_command("trending", "Show what's trending.",
+            "woeid",
+            "The woeid of the trending area, if absent, uses the configured one.",
+            "",
+            "trends_cb", "")

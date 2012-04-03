@@ -63,6 +63,8 @@ description of them.
   weetwit related files will be kept.
 * **plugins.var.python.weetwit.timelined_location**: The location of the
   timelined monitoring daemon.
+* **plugins.var.python.weetwit.trend_woeid**: The woeid you want to see trends
+  for, defaults to worldwide.
 
 Weechat commands
 ================
@@ -108,6 +110,11 @@ timeline, this won't work.)
 
 * \/travail
   - Displays woeids of available trend locations.
+
+* \/trending [woeid]
+  - Displays what's trending in the location represented by [woeid].
+    If no woeid present it uses the woeid set at
+    plugins.var.python.weetwit.trend_woeid.
 
 FAQ
 ===

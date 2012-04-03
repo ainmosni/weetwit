@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-22
 #
-# Last Modified: 2012-04-03 15:36
+# Last Modified: 2012-04-03 17:10
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
@@ -119,6 +119,23 @@ class Twitter(object):
                     places[place['country']][place['name']] = place['woeid']
         return places
 
+
+    def get_trends(self, woeid):
+        """
+        Gets the current trends for the location represented by woeid.
+        Returns a list of trends with element 0 representing the location name.
+        """
+        try:
+            trend_response = self.api.trends_location(woeid)
+        except TweepError as error:
+            raise TwitterError("Failed to get trends: %s" % error)
+
+        trends = []
+        trends.append(trend_response[0]['locations'][0]['name'])
+        for trend in trend_response[0]['trends']:
+            trends.append(trend['name'])
+
+        return trends
 
     def __is_sane(self, message):
         """Does sanity checks to see if the status is valid."""
