@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-03-28 20:32
+# Last Modified: 2012-04-03 15:39
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -308,11 +308,37 @@ def unfollow_cb(data, buffer, args):
     print_success("User @%s unfollowed." % args)
     return wc.WEECHAT_RC_OK
 
+def trends_available_cb(data, buffer, args):
+    """Shows the available trend locations."""
+    global twitter
+    try:
+        places = twitter.get_trend_places()
+    except TwitterError as error:
+        print_error(error)
+    print_to_current("%sWorldwide\t%s" % (wc.color("*cyan"),
+        places['Worldwide']['woeid']))
+    del(places['Worldwide'])
+    print_to_current("\n")
+    countries = sorted(places)
+    for country in countries:
+        print_to_current("%s%s\t%s" % (wc.color("*cyan"), country,
+            places[country]['woeid']))
+        del(places[country]['woeid'])
+        print_to_current("%s------\t" % wc.color("magenta"))
+        locations = sorted(places[country])
+        for location in locations:
+            print_to_current("%s%s\t%s" % (wc.color("cyan"), location,
+                places[country][location]))
+        print_to_current("\n")
+    return wc.WEECHAT_RC_OK
+
+
 def search_cb(data, buffer, args):
     """The command to use for realtime search."""
     timelined = data
     setup_timeline(timelined, search=args)
     return wc.WEECHAT_RC_OK
+
 
 def timelined_cb(data, command, rc, stdout, stderr):
     """Very generic callback in case timelined acts weird."""
@@ -526,3 +552,9 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "The terms to search for.",
             "",
             "search_cb", tl)
+
+        hook = wc.hook_command("travail", "Show available trend areas.",
+            "",
+            "",
+            "",
+            "trends_available_cb", tl)

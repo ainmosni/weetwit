@@ -12,3 +12,4 @@ Changelog
 
 * Added realtime search.
 * Removed logging.
+* Added command to show available trending locations.

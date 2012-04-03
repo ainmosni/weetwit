@@ -106,6 +106,9 @@ timeline, this won't work.)
 * \/tunfollow <screen_name>
     - Unfollows screen_name.
 
+* \/travail
+  - Displays woeids of available trend locations.
+
 FAQ
 ===
 

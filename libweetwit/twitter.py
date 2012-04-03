@@ -7,12 +7,14 @@
 #
 # Creation Date: 2012-02-22
 #
-# Last Modified: 2012-03-21 14:02
+# Last Modified: 2012-04-03 15:36
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
 
 import re
+
+from collections import defaultdict
 
 from tweepy.parsers import ModelParser
 from tweepy import API, OAuthHandler, TweepError
@@ -91,6 +93,32 @@ class Twitter(object):
         except TweepError as error:
             raise TwitterError("Faled to get followed: %s" % error)
         return followed
+
+    def get_trend_places(self):
+        """
+        Returns a dict of dicts, first by country then by place.
+        Every country has a special 'woeid' key that holds the woeid of the
+        country itself and all the places of the country pointing to their
+        respective woeids.
+        A special exception is the 'Worldwide' "country" which only has a
+        woeid entry.
+        """
+        try:
+            trend_places = self.api.trends_available()
+        except TweepError as error:
+            raise TwitterError("Falied to get available places: %s." % error)
+
+        places = defaultdict(dict)
+        for place in trend_places:
+            if not place['country']:
+                places['Worldwide'] = { 'woeid': place['woeid']}
+            else:
+                if place['country'] == place['name']:
+                    places[place['country']]['woeid'] = place['woeid']
+                else:
+                    places[place['country']][place['name']] = place['woeid']
+        return places
+
 
     def __is_sane(self, message):
         """Does sanity checks to see if the status is valid."""
