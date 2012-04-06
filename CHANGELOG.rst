@@ -14,3 +14,9 @@ Changelog
 * Removed logging.
 * Added command to show available trending locations.
 * Added command to see what's trending.
+
+0.8.0 (Unreleased)
+++++++++++++++++++
+
+* Added a length counter that can be added to a bar.
+* Made it possible to tweet from the timeline buffer.

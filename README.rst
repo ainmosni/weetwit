@@ -12,6 +12,9 @@ Features
 ========
 
 * Realtime streaming timeline.
+* Realtime search.
+* Trending support.
+* Tweet length counter.
 * Updating, replying and retweeting according to Twitter standards.
 * Aware of twitter URL shortening.
 * Tools to query users and status updates.
@@ -66,6 +69,12 @@ description of them.
 * **plugins.var.python.weetwit.trend_woeid**: The woeid you want to see trends
   for, defaults to worldwide.
 
+Bar items
+=========
+
+* **tweet_counter** Shows the amount of characters that are typed into the
+  timeline buffer, it's aware of t.co URL shortening.
+
 Weechat commands
 ================
 
@@ -76,7 +85,8 @@ timeline, this won't work.)
 
 * \/tweet <status>
     - Update your status, this can be 140 characters long. URLs will be shortened 
-      using t.co by twitter.
+      using t.co by twitter. You don't need this command on the dedicated
+      timeline buffer.
 
 * \/tinfo <status identification>
     - Shows more detailed information about a status update.

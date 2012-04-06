@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-03 21:16
+# Last Modified: 2012-04-06 16:12
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -43,7 +43,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.7.0"
+SCRIPT_VERSION      = "0.8.0-DEV"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -376,6 +376,29 @@ def timelined_cb(data, command, rc, stdout, stderr):
     print_error(stderr)
     return wc.WEECHAT_RC_OK
 
+def timeline_prompt_cb(data, signal, signal_data):
+    """Tweets from the timeline buffer, also shows how long your tweet is."""
+    global buffers
+    if  wc.current_buffer() != buffers['__TIMELINE']:
+        return wc.WEECHAT_RC_OK
+    wc.bar_item_update('tweet_counter')
+    return wc.WEECHAT_RC_OK
+
+def tcounter_item_cb(data, item, window):
+    """Shows a counter of the current tweet length."""
+    global buffers
+    global twitter
+    if wc.current_buffer() != buffers['__TIMELINE']:
+        return ""
+    buf_text = wc.buffer_get_string(buffers['__TIMELINE'], 'input')
+    if buf_text.startswith("/"):
+        return "0/140"
+    count = twitter.status_count(buf_text)
+    color = wc.color("default")
+    if count > 140:
+        color = wc.color("*red")
+    return "%s%s/140" % (color, count)
+
 def stop_timelined(prefix, buffer):
     """Unhooks the specified timeline hook."""
     global hooks
@@ -409,12 +432,13 @@ def setup_timeline(timelined, followed=False, search=False):
         title = "%s's timeline" % user.screen_name
         prefix = "__TIMELINE"
         search = False
+        buf_cb = "tweet_cb"
     else:
         name = search
         title = "Twitter search for %s" % search
         prefix = md5(search).hexdigest()
-    # TODO: make tweeting nicer from this buffer.
-    buf = wc.buffer_new(name, "", "", "stop_timelined", prefix)
+        buf_cb = "tweet_cb"
+    buf = wc.buffer_new(name, buf_cb, "", "stop_timelined", prefix)
     # Some naming
     wc.buffer_set(buf, "title", title)
 
@@ -448,6 +472,9 @@ def setup_timeline(timelined, followed=False, search=False):
     if search:
         wc.buffer_set(buf, "display", "1")
     buffers[prefix] = buf
+
+    hooks['signal'] = wc.hook_signal("input_text_changed",
+            "timeline_prompt_cb", "")
 
     if prefix is "__TIMELINE":
         tlid[prefix] = "timelined"
@@ -516,6 +543,7 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
         tl = timelined[0]
 
         setup_timeline(tl, followed=followed)
+        bar_item = wc.bar_item_new('tweet_counter', 'tcounter_item_cb', '')
 
 
         # Config change hook.

@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-22
 #
-# Last Modified: 2012-04-03 17:10
+# Last Modified: 2012-04-06 15:03
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
@@ -137,10 +137,16 @@ class Twitter(object):
 
         return trends
 
+    def status_count(self, message):
+        """
+        Replaces the URLs and returns the length how twitter would count it.
+        """
+        message = self.__replace_urls(message)
+        return(len(message))
+
     def __is_sane(self, message):
         """Does sanity checks to see if the status is valid."""
-        message = self.__replace_urls(message)
-        if len(message) > 140:
+        if self.status_count(message) > 140:
             return False
         return True
 
