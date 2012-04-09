@@ -135,6 +135,6 @@ FAQ
 
 
     :Q: I don't want those ugly STATUSIDs in my weetwit buffer.
-    :A: Add a filter like this: "/filter add statusid python.weetwit * \\[#STATUSID:"
+    :A: Add a filter like this: "/filter add statusid python.timeline * \\[#STATUSID:"
         now you can toggle between them hidden and visible, depending on your
         needs.
