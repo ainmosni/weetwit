@@ -7,9 +7,10 @@
 #
 # Creation Date: 2012-01-09
 #
-# Last Modified: 2012-03-21 14:22
+# Last Modified: 2012-04-03 16:14
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
+#
 
 import ipdb
 import sys
@@ -34,11 +35,5 @@ if not os.path.isdir(storage):
     sys.exit(3)
 
 twitter = Twitter(storage_dir=storage)
-print twitter.api.me().name
 
-user = twitter.get_user("astrid")
-
-names = twitter.get_followed()
-for name in names:
-    print name
 ipdb.set_trace()

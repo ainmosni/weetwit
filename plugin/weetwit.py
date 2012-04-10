@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-06 16:12
+# Last Modified: 2012-04-10 11:54
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -185,6 +185,39 @@ def tweet_info_cb(data, buffer, args):
         return wc.WEECHAT_RC_OK
     display_tweet_details(tweet)
     return wc.WEECHAT_RC_OK
+
+def conversation_cb(data, buffer, args):
+    """
+    Follows the reply trail until the original was found.
+    NOTE: This might block for a while.
+    """
+    global twitter
+    conversation = []
+    reply_id = args
+    # Loop as long as there was a reply_id.
+    while reply_id:
+        try:
+            conversation.append(twitter.get_tweet(reply_id))
+            reply_id = conversation[-1].in_reply_to_status_id
+        except TwitterError as error:
+            print_error(error)
+            break
+    if conversation:
+        # Reverse the conversation to get the oldest first.
+        conversation.reverse()
+        # Now display the conversation.
+        print_to_current("%s-------------------" % wc.color("magenta"))
+        for tweet in conversation:
+            tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
+            screen_name = tweep_color + tweet.screen_name
+            text = tweet.txt
+            output = u"%s\t%s" % (screen_name, text)
+            if tweet.is_retweet:
+                output += " (RT by @%s)" % tweet.rtscreen_name
+            print_to_current(output)
+        print_to_current("%s-------------------" % wc.color("magenta"))
+    return wc.WEECHAT_RC_OK
+
 
 def tweet_share_cb(data, buffer, args):
     """Share tweet with current IRC channel."""
@@ -568,6 +601,13 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "The ID of the tweet, if @username is given, the ID of their last tweet is used.",
             "",
             "treply_cb", "")
+
+        hook = wc.hook_command("tconversation", 
+                "Show the conversation leading up to a specific tweet.",
+            "[tweet id/@username]",
+            "The ID of the tweet, if @username is given, the ID of their last tweet is used.",
+            "",
+            "conversation_cb", "")
 
         hook = wc.hook_command("retweet", "Retweet a specific tweet.",
             "[tweet id/@username]",
