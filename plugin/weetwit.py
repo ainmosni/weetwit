@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-12 16:14
+# Last Modified: 2012-04-12 16:19
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -43,7 +43,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.8.0-DEV"
+SCRIPT_VERSION      = "0.8.0"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 

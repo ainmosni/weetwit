@@ -15,10 +15,11 @@ Changelog
 * Added command to show available trending locations.
 * Added command to see what's trending.
 
-0.8.0 (Unreleased)
+0.8.0 (2012-04-12)
 ++++++++++++++++++
 
 * Added a length counter that can be added to a bar.
 * Made it possible to tweet from the timeline buffer.
 * Handled a stacktrace better when inputting a wrong woeid.
 * Added a command to report spam.
+* Added the twitter client to /tinfo.
