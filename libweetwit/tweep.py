@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-03-06
 #
-# Last Modified: 2012-03-14 22:19
+# Last Modified: 2012-04-12 11:53
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -28,3 +28,7 @@ class Tweep(User):
         user.description = unescape(user.description)
         user.location = unescape(user.location)
         return user
+
+    def report_spam(self):
+        """Reports the user for spam."""
+        return self._api.report_spam(self.id)

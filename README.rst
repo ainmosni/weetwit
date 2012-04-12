@@ -31,7 +31,7 @@ becoming public knowledge. You can create the application at `Twitter
 
 First we need to install the module:
 
-Installation through pip::
+Installation through pip, note that you must get the plugin seperately.::
 
     # pip install weetwit
     $ Copy the plugin to ~/.weechat/python
@@ -97,6 +97,9 @@ timeline, this won't work.)
       prefixed with a dot, a dot will be prepended to the message so that your
       other followers will see it as well.
 
+* \/tconversation <status identification>
+    - Displays the conversation leading up this status update.
+
 * \/retweet <status identification> [message]
     - Retweets the relevant status update, if [message] is present this will
       prepended to the retweet.
@@ -125,6 +128,10 @@ timeline, this won't work.)
 
 * \/travail
     - Displays woeids of available trend locations.
+
+* \/treport [--yes] <screen_name>
+    - Reports <screen_name> for spam. If --yes isn't added, the user won't be
+      reported for spam.
 
 FAQ
 ===

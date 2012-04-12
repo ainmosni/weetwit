@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-12 11:17
+# Last Modified: 2012-04-12 15:54
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -310,6 +310,33 @@ def show_user_cb(data, buffer, args):
         print_to_current("%sVerified!\t%s" % (wc.color("*yellow"),
             user.verified))
     print_to_current("%s-------------------" % wc.color("magenta"))
+    return wc.WEECHAT_RC_OK
+
+def report_spam_cb(data, buffer, args):
+    """Reports a user for spam."""
+    global twitter
+    arglist = args.split()
+    if len(arglist) > 2:
+        print_error("Too many arguments.")
+        return wc.WEECHAT_RC_OK
+    spammer = arglist[-1]
+    try:
+        user = twitter.get_user(spammer)
+    except TwitterError as error:
+        print_error("Can't get user: %s" % error)
+        return wc.WEECHAT_RC_OK
+    if arglist[0] != "--yes":
+        print_error("Are you sure you want to report %s for spamming?" %
+                user.name)
+        print_error("If you are sure please confirm by typing /treport --yes %s" %
+                args)
+        return wc.WEECHAT_RC_OK
+    try:
+        user.report_spam()
+    except TwitterError as error:
+        print_error("Failed to report %s for spamming: " % (user.name, error))
+        return wc.WEECHAT_RC_OK
+    print_success("Successfully reported %s for spamming!" % user.name)
     return wc.WEECHAT_RC_OK
 
 
@@ -657,3 +684,9 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "The woeid of the trending area, if absent, uses the configured one.",
             "",
             "trends_cb", "")
+
+        hook = wc.hook_command("treport", "Report a user for spam.",
+            "[--yes] username",
+            "Report a user for spam.",
+            "",
+            "report_spam_cb", "")

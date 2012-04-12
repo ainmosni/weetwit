@@ -20,3 +20,5 @@ Changelog
 
 * Added a length counter that can be added to a bar.
 * Made it possible to tweet from the timeline buffer.
+* Handled a stacktrace better when inputting a wrong woeid.
+* Added a command to report spam.
