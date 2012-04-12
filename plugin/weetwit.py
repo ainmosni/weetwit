@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-10 11:54
+# Last Modified: 2012-04-12 11:17
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -376,7 +376,8 @@ def trends_cb(data, buffer, args):
     try:
         trends = twitter.get_trends(woeid)
     except TwitterError as error:
-        print_error("Failed getting trends" % error)
+        print_error("Failed getting trends: %s" % error)
+        return wc.WEECHAT_RC_OK
 
     print_to_current("%s-------------------" % wc.color("magenta"))
     header = "%sTrending " % wc.color("*cyan")
