@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-21
 #
-# Last Modified: 2012-03-26 09:18
+# Last Modified: 2012-04-12 16:13
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -51,6 +51,7 @@ class Tweet(Status):
         setattr(status, 'rtscreen_name', rtscreen_name)
         setattr(status, 'is_retweet', is_retweet)
         setattr(status, 'txt', status.expand_urls(status.txt_unescaped))
+        setattr(status, 'source', unescape(status.source))
         return status
 
 

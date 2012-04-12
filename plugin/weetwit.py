@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-12 15:54
+# Last Modified: 2012-04-12 16:14
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -99,6 +99,7 @@ def display_tweet_details(tweet):
     print_to_current("%sBy\t%s (@%s)" % (wc.color("*cyan"), tweet.name,
         tweet.screen_name))
     print_to_current("%sTweet\t%s" % (wc.color("*cyan"), tweet.txt))
+    print_to_current("%sClient\t%s" % (wc.color("*cyan"), tweet.source))
     if tweet.is_retweet:
         print_to_current("%sRetweeted By\t%s (@%s)" % (wc.color("*cyan"),
             tweet.rtname, tweet.rtscreen_name))
