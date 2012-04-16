@@ -1,19 +1,12 @@
 Changelog
 ---------
 
-0.6.2 (2012-03-21)
+0.9.0 (Unreleased)
 ++++++++++++++++++
 
-* Changed displayed timestamps to when the tweet was created.
-* Added the user's own screen_name to the nicklist.
-
-0.7.0 (2012-04-03)
-++++++++++++++++++++
-
-* Added realtime search.
-* Removed logging.
-* Added command to show available trending locations.
-* Added command to see what's trending.
+* Added STATUSID markers to the conversation view.
+* Added /tfavourites to show your favourites.
+* Added /tfavourite to add a tweet to favourites.
 
 0.8.0 (2012-04-12)
 ++++++++++++++++++
@@ -23,3 +16,17 @@ Changelog
 * Handled a stacktrace better when inputting a wrong woeid.
 * Added a command to report spam.
 * Added the twitter client to /tinfo.
+
+0.7.0 (2012-04-03)
+++++++++++++++++++++
+
+* Added realtime search.
+* Removed logging.
+* Added command to show available trending locations.
+* Added command to see what's trending.
+
+0.6.2 (2012-03-21)
+++++++++++++++++++
+
+* Changed displayed timestamps to when the tweet was created.
+* Added the user's own screen_name to the nicklist.

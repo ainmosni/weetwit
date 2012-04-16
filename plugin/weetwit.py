@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-12 16:19
+# Last Modified: 2012-04-16 16:47
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -43,7 +43,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.8.0"
+SCRIPT_VERSION      = "0.9.0-DEV"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -100,6 +100,9 @@ def display_tweet_details(tweet):
         tweet.screen_name))
     print_to_current("%sTweet\t%s" % (wc.color("*cyan"), tweet.txt))
     print_to_current("%sClient\t%s" % (wc.color("*cyan"), tweet.source))
+    if tweet.favorited:
+        print_to_current("%sFavourite\t%s" % (wc.color("*cyan"),
+            tweet.favorited))
     if tweet.is_retweet:
         print_to_current("%sRetweeted By\t%s (@%s)" % (wc.color("*cyan"),
             tweet.rtname, tweet.rtscreen_name))
@@ -107,8 +110,6 @@ def display_tweet_details(tweet):
         print_to_current("%sReply To\t%s" % (wc.color("*cyan"),
             tweet.in_reply_to_status_id))
     print_to_current("%s-------------------" % wc.color("magenta"))
-
-
 
 def display_cb(data, remaining_calls):
     """
@@ -211,14 +212,49 @@ def conversation_cb(data, buffer, args):
         for tweet in conversation:
             tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
             screen_name = tweep_color + tweet.screen_name
-            text = tweet.txt
-            output = u"%s\t%s" % (screen_name, text)
+            output = "%s\t%s" % (screen_name, tweet.txt)
             if tweet.is_retweet:
                 output += " (RT by @%s)" % tweet.rtscreen_name
+            output += "\n[#STATUSID: %s]" % tweet.id
             print_to_current(output)
         print_to_current("%s-------------------" % wc.color("magenta"))
     return wc.WEECHAT_RC_OK
 
+def show_favorites_cb(data, buffer, args):
+    """
+    Show all the tweets that are favourited by the user.
+    """
+    global twitter
+    try:
+        favs = twitter.get_favorites()
+    except TwitterError as error:
+        print_error(error)
+        return wc.WEECHAT_RC_OK
+    if favs:
+        print_to_current("%sFAVOURITES\t%s-------------------" %
+                (wc.color("yellow"), wc.color("magenta")))
+        for fav in favs:
+            tweep_color = wc.info_get("irc_nick_color", fav.screen_name)
+            screen_name = tweep_color + fav.screen_name
+            output = "%s\t%s" % (screen_name, fav.txt)
+            if fav.is_retweet:
+                output += " (RT by @%s)" % fav.rtscreen_name
+            output += "\n[#STATUSID: %s]" % fav.id
+            print_to_current(output)
+        print_to_current("%s-------------------" % wc.color("magenta"))
+    return wc.WEECHAT_RC_OK
+
+def tweet_favorite_cb(data, buffer, args):
+    """Add a tweet to your favourites."""
+    global twitter
+    try:
+        tweet = twitter.get_tweet(args)
+        tweet.favorite()
+    except (TwitterError, TwitterError) as error:
+        print_error("Couldn't favourite tweet: %s" % error)
+        return wc.WEECHAT_RC_OK
+    print_success("Tweet successfully favourited.")
+    return wc.WEECHAT_RC_OK
 
 def tweet_share_cb(data, buffer, args):
     """Share tweet with current IRC channel."""
@@ -691,3 +727,15 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "Report a user for spam.",
             "",
             "report_spam_cb", "")
+
+        hook = wc.hook_command("tfavourites", "Show your favourites",
+            "",
+            "Show your favourites",
+            "",
+            "show_favorites_cb", "")
+
+        hook = wc.hook_command("tfavourite", "Add a tweet to your favourites.",
+            "[tweet id/@username]",
+            "The @username of the user you want information about.",
+            "",
+            "tweet_favorite_cb", "")

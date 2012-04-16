@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-22
 #
-# Last Modified: 2012-04-06 15:03
+# Last Modified: 2012-04-16 14:36
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
@@ -119,7 +119,6 @@ class Twitter(object):
                     places[place['country']][place['name']] = place['woeid']
         return places
 
-
     def get_trends(self, woeid):
         """
         Gets the current trends for the location represented by woeid.
@@ -136,6 +135,14 @@ class Twitter(object):
             trends.append(trend['name'])
 
         return trends
+
+    def get_favorites(self):
+        """Get your favourite tweets."""
+        try:
+            favorites = self.api.favorites()
+        except TweepError as error:
+            raise TwitterError("Failed to get favourites: %s" % error)
+        return favorites
 
     def status_count(self, message):
         """

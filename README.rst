@@ -15,10 +15,12 @@ Features
 * Realtime search.
 * Trending support.
 * Tweet length counter.
+* Favourite support.
 * Updating, replying and retweeting according to Twitter standards.
 * Aware of twitter URL shortening.
 * Tools to query users and status updates.
 * Able to (un-)follow directly from weechat.
+* Report spammers directly from weechat.
 * Share updates with IRC.
 
 Installation
@@ -99,6 +101,12 @@ timeline, this won't work.)
 
 * \/tconversation <status identification>
     - Displays the conversation leading up this status update.
+
+* \/tfavourite <status identification>
+    - Favourites a status update.
+
+* \/tfavourites
+    - Shows your favourited tweets.
 
 * \/retweet <status identification> [message]
     - Retweets the relevant status update, if [message] is present this will
