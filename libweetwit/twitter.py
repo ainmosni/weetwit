@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-22
 #
-# Last Modified: 2012-04-16 14:36
+# Last Modified: 2012-04-17 13:26
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
@@ -139,7 +139,7 @@ class Twitter(object):
     def get_favorites(self):
         """Get your favourite tweets."""
         try:
-            favorites = self.api.favorites()
+            favorites = self.api.favorites(include_entities=True)
         except TweepError as error:
             raise TwitterError("Failed to get favourites: %s" % error)
         return favorites
