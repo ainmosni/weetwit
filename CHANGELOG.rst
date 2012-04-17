@@ -5,8 +5,9 @@ Changelog
 ++++++++++++++++++
 
 * Added STATUSID markers to the conversation view.
-* Added /tfavourites to show your favourites.
-* Added /tfavourite to add a tweet to favourites.
+* Added /tfavorites to show your favourites.
+* Added /tfavorite to add a tweet to favourites.
+* Added /tunfavorite to remove a tweet from your favourites.
 
 0.8.0 (2012-04-12)
 ++++++++++++++++++

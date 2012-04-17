@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-16 16:47
+# Last Modified: 2012-04-17 11:45
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -254,6 +254,18 @@ def tweet_favorite_cb(data, buffer, args):
         print_error("Couldn't favourite tweet: %s" % error)
         return wc.WEECHAT_RC_OK
     print_success("Tweet successfully favourited.")
+    return wc.WEECHAT_RC_OK
+
+def tweet_unfavorite_cb(data, buffer, args):
+    """Remove a tweet from your favourites."""
+    global twitter
+    try:
+        tweet = twitter.get_tweet(args)
+        tweet.unfavorite()
+    except (TwitterError, TwitterError) as error:
+        print_error("Couldn't unfavourite tweet: %s" % error)
+        return wc.WEECHAT_RC_OK
+    print_success("Tweet successfully unfavourited.")
     return wc.WEECHAT_RC_OK
 
 def tweet_share_cb(data, buffer, args):
@@ -736,6 +748,13 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
 
         hook = wc.hook_command("tfavourite", "Add a tweet to your favourites.",
             "[tweet id/@username]",
-            "The @username of the user you want information about.",
+            "The ID of the tweet, if @username is given, the ID of their last tweet is used.",
             "",
             "tweet_favorite_cb", "")
+
+        hook = wc.hook_command("tunfavourite",
+            "Remove a tweet from your favourites.",
+            "[tweet id/@username]",
+            "The ID of the tweet, if @username is given, the ID of their last tweet is used.",
+            "",
+            "tweet_unfavorite_cb", "")

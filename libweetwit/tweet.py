@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-21
 #
-# Last Modified: 2012-04-12 16:13
+# Last Modified: 2012-04-17 13:04
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -40,7 +40,9 @@ class Tweet(Status):
                 screen_name = status.user.screen_name
                 is_retweet = False
             except AttributeError:
-                raise TwitterError("Not a valid tweet!")
+                raise TwitterError(
+                    "Found a non status update. (Probably a favourite notification)"
+                    )
         rtname = status.user.name
         rtscreen_name = status.user.screen_name
         setattr(status, 'tid', tid)
@@ -53,6 +55,10 @@ class Tweet(Status):
         setattr(status, 'txt', status.expand_urls(status.txt_unescaped))
         setattr(status, 'source', unescape(status.source))
         return status
+
+    def unfavorite(self):
+        """Unfavorites this tweet."""
+        self._api.destroy_favorite(self.id)
 
 
     def expand_urls(self, text):

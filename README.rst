@@ -102,11 +102,15 @@ timeline, this won't work.)
 * \/tconversation <status identification>
     - Displays the conversation leading up this status update.
 
-* \/tfavourite <status identification>
+* \/tfavorite <status identification>
     - Favourites a status update.
 
-* \/tfavourites
+* \/tunfavorite <status identification>
+    - Removes a tweet from your favourites.
+
+* \/tfavorites
     - Shows your favourited tweets.
+
 
 * \/retweet <status identification> [message]
     - Retweets the relevant status update, if [message] is present this will
