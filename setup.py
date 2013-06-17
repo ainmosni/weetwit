@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-03-13
 #
-# Last Modified: 2012-04-16 16:20
+# Last Modified: 2013-06-17 23:50
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 import os
@@ -19,7 +19,7 @@ def read(fname):
 
 setup(
     name='weetwit',
-    version='0.9.0-DEV',
+    version='0.9.1',
     author=u'Daniël Franke',
     author_email='daniel@ams-sec.org',
     packages=['libweetwit'],
@@ -29,7 +29,7 @@ setup(
     url='https://github.com/ainmosni/weetwit',
     description='Twitter suite for Weechat.',
     long_description=read("README.rst"),
-    install_requires=["tweepy>=1.8"],
+    install_requires=["tweepy>=2.0"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console :: Curses",

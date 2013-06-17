@@ -22,6 +22,8 @@ Features
 * Able to (un-)follow directly from weechat.
 * Report spammers directly from weechat.
 * Share updates with IRC.
+* Conversation support
+
 
 Installation
 ============

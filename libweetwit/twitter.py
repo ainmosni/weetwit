@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-02-22
 #
-# Last Modified: 2012-04-17 13:26
+# Last Modified: 2013-06-17 23:42
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 #
@@ -17,11 +17,13 @@ import re
 from collections import defaultdict
 
 from tweepy.parsers import ModelParser
-from tweepy import API, OAuthHandler, TweepError
+from tweepy import OAuthHandler, TweepError
 
 from libweetwit.wtmodelfactory import wtModelFactory
 from libweetwit.db import DB
 from libweetwit.exceptions import TwitterError
+from libweetwit.api import weetwitAPI as API
+
 
 class Twitter(object):
     """A class that does all interactions with twitter."""
@@ -111,7 +113,7 @@ class Twitter(object):
         places = defaultdict(dict)
         for place in trend_places:
             if not place['country']:
-                places['Worldwide'] = { 'woeid': place['woeid']}
+                places['Worldwide'] = {'woeid': place['woeid']}
             else:
                 if place['country'] == place['name']:
                     places[place['country']]['woeid'] = place['woeid']
@@ -165,8 +167,8 @@ class Twitter(object):
         # Base domain regex off RFC 1034 and 1738
         label = r'[0-9a-z][-0-9a-z]*[0-9a-z]?'
         domain = r'%s(?:\.%s)*\.[a-z][-0-9a-z]*[a-z]?' % (label, label)
-        url_re = re.compile(r'(\w+://(?:%s|%s)(?::\d+)?(?:/[^\])>\s]*)?)' % \
-                (domain, ip_addr), re.I)
+        url_re = re.compile(r'(\w+://(?:%s|%s)(?::\d+)?(?:/[^\])>\s]*)?)' %
+                            (domain, ip_addr), re.I)
 
         new_message = message
 
@@ -177,4 +179,3 @@ class Twitter(object):
             new_message = new_message.replace(url, short_url)
 
         return new_message
-

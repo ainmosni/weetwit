@@ -7,7 +7,7 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2012-04-17 11:45
+# Last Modified: 2013-06-17 23:48
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
@@ -43,7 +43,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.9.0-DEV"
+SCRIPT_VERSION      = "0.9.1"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -679,7 +679,7 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "",
             "treply_cb", "")
 
-        hook = wc.hook_command("tconversation", 
+        hook = wc.hook_command("tconversation",
                 "Show the conversation leading up to a specific tweet.",
             "[tweet id/@username]",
             "The ID of the tweet, if @username is given, the ID of their last tweet is used.",

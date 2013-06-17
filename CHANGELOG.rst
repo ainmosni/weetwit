@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+0.9.1 (2013-06-17)
+++++++++++++++++++
+
+* Fix to work with tweepy 2.0, needed because twitter killed the 1.0 API.
+* Because of the API upgrade, weetwit now requires tweepy 2.0.
+* Yes, I'm still alive and will fix breakages. Features will come slowly
+  though, if you want it badly enough, either ask me through twitter/IRC or
+  shoot me a pull request.
+
 0.9.0 (Unreleased)
 ++++++++++++++++++
 
