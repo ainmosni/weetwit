@@ -78,6 +78,10 @@ description of them.
   timelined monitoring daemon.
 * **plugins.var.python.weetwit.trend_woeid**: The woeid you want to see trends
   for, defaults to worldwide.
+* **plugins.var.python.weetwit.nick_color**: The color of @names.
+* **plugins.var.python.weetwit.hash_color**: The color of #hashtags.
+* **plugins.var.python.weetwit.mention_color**: The color that @people
+  mentioned in tweets should have.
 
 Bar items
 =========

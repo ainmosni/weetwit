@@ -147,6 +147,7 @@ def display_cb(data, remaining_calls):
     global twitter
     global buffers
     global tlid
+    default_color = wc.color("default")
     show_in_cur = "Off"
     cur_away = "On"
     cur_detached = "On"
@@ -172,7 +173,7 @@ def display_cb(data, remaining_calls):
     try:
         for tweet in StatusMonitor(status_dir, twitter.api):
 
-            tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
+            tweep_color = wc.color(wc.config_get_plugin("nick_color"))
             for buf in valid_buffers:
                 screen_name = tweep_color + tweet.screen_name
                 text = tweet.txt
@@ -180,6 +181,11 @@ def display_cb(data, remaining_calls):
                     cur_color = wc.color(wc.config_get_plugin("current_color"))
                     screen_name = cur_color + "@" + screen_name
                     text = cur_color + text
+
+                mention_color = wc.color(wc.config_get_plugin("mention_color"))
+                hash_color = wc.color(wc.config_get_plugin("hash_color"))
+                text = re.sub(r'(?P<name>@\w+)', r"{}\1{}".format(mention_color,default_color), text)
+                text = re.sub(r'(?P<hash>#\w+)', r"{}\1{}".format(hash_color,default_color), text)
                 output = u"%s\t%s" % \
                     (screen_name, text)
                 if tweet.is_retweet:
@@ -648,7 +654,10 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "current_while_detached": "true",
             "current_color" : "cyan",
             "timelined_location" : "timelined",
-            "trend_woeid" : "1"
+            "trend_woeid" : "1",
+            "nick_color" : "blue",
+            "hash_color" : "red",
+            "mention_color" : "blue"
     }
     for option, default_value in script_options.iteritems():
          if not wc.config_is_set_plugin(option):
