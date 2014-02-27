@@ -127,7 +127,7 @@ class Twitter(object):
         Returns a list of trends with element 0 representing the location name.
         """
         try:
-            trend_response = self.api.trends_location(woeid)
+            trend_response = self.api.trends_place(woeid)
         except TweepError as error:
             raise TwitterError("Failed to get trends: %s" % error)
 
