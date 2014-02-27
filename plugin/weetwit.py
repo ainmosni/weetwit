@@ -18,6 +18,7 @@
 import os
 import sys
 import time
+import re
 
 from hashlib import md5
 
@@ -111,6 +112,33 @@ def display_tweet_details(tweet):
             tweet.in_reply_to_status_id))
     print_to_current("%s-------------------" % wc.color("magenta"))
 
+def is_attached():
+    """
+    Check if screen/tmux is attached.
+    """
+    sock = False
+    if 'STY' in os.environ.keys():
+        # We're in screen
+        cmd_output = os.popen('env LC_ALL=C screen -ls').read()
+        match = re.search(r'Sockets? in (/.+)\.', cmd_output)
+        if match:
+            sock = os.path.join(match.group(1), os.environ['STY'])
+
+    if not sock and 'TMUX' in os.environ.keys():
+        # We're in tmux
+        socket_data = os.environ['TMUX']
+        sock = socket_data.rsplit(',', 2)[0]
+
+    if not sock:
+        # If we didn't find anything, we're always attached.
+        return True
+
+    attached = os.access(sock, os.X_OK)
+    if attached:
+        return True
+
+    return False
+
 def display_cb(data, remaining_calls):
     """
     Displays the timeline
@@ -120,13 +148,24 @@ def display_cb(data, remaining_calls):
     global buffers
     global tlid
     show_in_cur = "Off"
+    cur_away = "On"
+    cur_detached = "On"
     valid_buffers = []
     valid_buffers.append(buffers[data])
     current_buffer = wc.current_buffer()
     show_in_cur = wc.config_string_to_boolean(wc.config_get_plugin("show_in_current"))
+    cur_away = wc.config_string_to_boolean(wc.config_get_plugin("current_while_away"))
+    cur_detached = wc.config_string_to_boolean(wc.config_get_plugin("current_while_detached"))
+    away = wc.buffer_get_string(current_buffer, 'localvar_away')
 
     # I have NO idea why is doesn't work here but this does so... what?
-    if "__TIMELINE" in data and show_in_cur and buffers[data] != current_buffer:
+    if (
+        "__TIMELINE" in data
+        and show_in_cur
+        and buffers[data] != current_buffer
+        and (not away or cur_away)
+        and (is_attached() or cur_detached)
+       ):
         valid_buffers.append(current_buffer)
     status_dir = os.path.join(wc.config_get_plugin("storage_dir"),
             tlid[data])
@@ -605,6 +644,8 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "access_token" : "",
             "access_token_secret" : "",
             "show_in_current" : "false",
+            "current_while_away": "true",
+            "current_while_detached": "true",
             "current_color" : "cyan",
             "timelined_location" : "timelined",
             "trend_woeid" : "1"

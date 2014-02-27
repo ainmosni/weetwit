@@ -66,6 +66,12 @@ description of them.
 
 * **plugins.var.python.weetwit.show_in_current**: Show the timeline in the
   current window.
+* **plugins.var.python.weetwit.current_while_away**: Show the timeline in the
+  current window while away.
+* **plugins.var.python.weetwit.current_while_detached**: Show the timeline in the
+  current window while screen/tmux detached.
+* **plugins.var.python.weetwit.current_color**: The color of the tweets in the
+  current buffer.
 * **plugins.var.python.weetwit.storage_dir**: The location of where all the
   weetwit related files will be kept.
 * **plugins.var.python.weetwit.timelined_location**: The location of the
