@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+0.10.0 (2014-02-27)
+++++++++++++++++++
+
+* Fix the /trending command.
+* Add more granular control over when the timeline appears in your current
+  buffer.
+
 0.9.1 (2013-06-17)
 ++++++++++++++++++
 
