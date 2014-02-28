@@ -52,11 +52,30 @@ class Tweet(Status):
         setattr(status, 'rtname', unescape(rtname))
         setattr(status, 'rtscreen_name', rtscreen_name)
         setattr(status, 'is_retweet', is_retweet)
-        setattr(status, 'txt', status.txt_unescaped)
+        setattr(status, 'txt', status.expand_urls(status.txt_unescaped))
         setattr(status, 'source', unescape(status.source))
         return status
 
     def unfavorite(self):
         """Unfavorites this tweet."""
         self._api.destroy_favorite(self.id)
+
+
+    def expand_urls(self, text):
+        """Expands the URLs in the text."""
+        try:
+            url_list = self.retweeted_status.entities['urls']
+        except AttributeError:
+            try:
+                url_list = self.entities['urls']
+            except AttributeError:
+                return text
+
+        for url in url_list:
+            try:
+                replacement = "%s [%s]" % (url['display_url'], url['url'])
+                text = text.replace(url['url'], replacement)
+            except (TypeError, KeyError):
+                pass
+        return text
 
