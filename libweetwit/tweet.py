@@ -52,6 +52,7 @@ class Tweet(Status):
         setattr(status, 'rtname', unescape(rtname))
         setattr(status, 'rtscreen_name', rtscreen_name)
         setattr(status, 'is_retweet', is_retweet)
+        setattr(status, 'txt_unescaped', status.txt_unescaped)
         setattr(status, 'txt', status.expand_urls(status.txt_unescaped))
         setattr(status, 'source', unescape(status.source))
         return status

@@ -83,6 +83,12 @@ description of them.
 * **plugins.var.python.weetwit.hash_color**: The color of #hashtags.
 * **plugins.var.python.weetwit.mention_color**: The color that @people
   mentioned in tweets should have.
+* **rt_style**: How RTs are displayed. 'postfix' will show the retweeter after
+  the tweet like this (RT by @username) 'prefix' will show the retweeter before
+  the tweet.
+* **expand_urls**: Expand URLs, when this is on, it will show a preview of the
+  URL before the t.co URL, if off it will only show the t.co url.
+
 
 Bar items
 =========
