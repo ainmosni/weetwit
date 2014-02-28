@@ -99,7 +99,11 @@ def display_tweet_details(tweet):
     print_to_current("%sTweet ID\t%s" % (wc.color("*cyan"), tweet.tid))
     print_to_current("%sBy\t%s (@%s)" % (wc.color("*cyan"), tweet.name,
         tweet.screen_name))
-    print_to_current("%sTweet\t%s" % (wc.color("*cyan"), tweet.txt))
+    expand_urls = wc.config_string_to_boolean(wc.config_get_plugin("expand_urls"))
+    text = tweet.txt_unescaped
+    if expand_urls:
+        text = tweet.txt
+    print_to_current("%sTweet\t%s" % (wc.color("*cyan"), text))
     print_to_current("%sClient\t%s" % (wc.color("*cyan"), tweet.source))
     if tweet.favorited:
         print_to_current("%sFavourite\t%s" % (wc.color("*cyan"),
@@ -154,6 +158,7 @@ def display_cb(data, remaining_calls):
     valid_buffers = []
     valid_buffers.append(buffers[data])
     current_buffer = wc.current_buffer()
+    expand_urls = wc.config_string_to_boolean(wc.config_get_plugin("expand_urls"))
     show_in_cur = wc.config_string_to_boolean(wc.config_get_plugin("show_in_current"))
     cur_away = wc.config_string_to_boolean(wc.config_get_plugin("current_while_away"))
     cur_detached = wc.config_string_to_boolean(wc.config_get_plugin("current_while_detached"))
@@ -178,21 +183,33 @@ def display_cb(data, remaining_calls):
                 tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
             for buf in valid_buffers:
                 screen_name = tweep_color + "@" + tweet.screen_name
-                text = tweet.txt
+
+                text = tweet.txt_unescaped
+                if expand_urls:
+                    text = tweet.txt
+                text_color = default_color
                 if buf is current_buffer:
-                    cur_color = wc.color(wc.config_get_plugin("current_color"))
-                    screen_name = cur_color + "@" + screen_name
+                    text_color = cur_color = wc.color(wc.config_get_plugin("current_color"))
+                    screen_name = cur_color + screen_name
                     text = cur_color + text
 
                 mention_color = wc.color(wc.config_get_plugin("mention_color"))
                 hash_color = wc.color(wc.config_get_plugin("hash_color"))
-                text = re.sub(r'(?P<name>@\w+)', r"{}\1{}".format(mention_color,default_color), text)
-                text = re.sub(r'(?P<hash>#\w+)', r"{}\1{}".format(hash_color,default_color), text)
+                text = re.sub(r'(?P<name>@\w+)', r"{}\1{}".format(mention_color,text_color), text)
+                text = re.sub(r'(?P<hash>#\w+)', r"{}\1{}".format(hash_color,text_color), text)
+
+                retweet_style = wc.config_get_plugin("rt_style")
 
                 output =""
                 if tweet.is_retweet:
                     retweeter = "%s@%s" % (mention_color, tweet.rtscreen_name)
-                    output = "%s\tRT %s%s %s" % (retweeter, screen_name, default, text)
+                    if retweet_style == 'postfix':
+                        output += ' (RT by %s)' % (retweeter)
+                    else:
+                        output = "%s\tRT %s%s %s" % (retweeter,
+                                                     screen_name,
+                                                     text_color,
+                                                     text)
                 else:
                     output = u"%s\t%s" % (screen_name, text)
 
@@ -263,7 +280,11 @@ def conversation_cb(data, buffer, args):
         for tweet in conversation:
             tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
             screen_name = tweep_color + tweet.screen_name
-            output = "%s\t%s" % (screen_name, tweet.txt)
+            expand_urls = wc.config_string_to_boolean(wc.config_get_plugin("expand_urls"))
+            text = tweet.txt_unescaped
+            if expand_urls:
+                text = tweet.txt
+            output = "%s\t%s" % (screen_name, text)
             if tweet.is_retweet:
                 output += " (RT by @%s)" % tweet.rtscreen_name
             output += "\n[#STATUSID: %s]" % tweet.id
@@ -287,7 +308,11 @@ def show_favorites_cb(data, buffer, args):
         for fav in favs:
             tweep_color = wc.info_get("irc_nick_color", fav.screen_name)
             screen_name = tweep_color + fav.screen_name
-            output = "%s\t%s" % (screen_name, fav.txt)
+            expand_urls = wc.config_string_to_boolean(wc.config_get_plugin("expand_urls"))
+            text = fav.text_unescaped
+            if expand_urls:
+                text = fav.text
+            output = "%s\t%s" % (screen_name, text)
             if fav.is_retweet:
                 output += " (RT by @%s)" % fav.rtscreen_name
             output += "\n[#STATUSID: %s]" % fav.id
@@ -327,8 +352,12 @@ def tweet_share_cb(data, buffer, args):
     except TwitterError as error:
         print_error(error)
         return wc.WEECHAT_RC_OK
+    expand_urls = wc.config_string_to_boolean(wc.config_get_plugin("expand_urls"))
+    text = tweet.txt_unescaped
+    if expand_urls:
+        text = tweet.txt
     message = '<@%s> %s [https://twitter.com/#!/%s/status/%s]' % \
-        (tweet.screen_name, tweet.txt, tweet.screen_name, tweet.tid)
+        (tweet.screen_name, text, tweet.screen_name, tweet.tid)
     wc.command(wc.current_buffer(), '/say %s' % message)
     return wc.WEECHAT_RC_OK
 
@@ -663,7 +692,9 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "trend_woeid" : "1",
             "nick_color" : "blue",
             "hash_color" : "red",
-            "mention_color" : "blue"
+            "mention_color" : "blue",
+            "rt_style" : "postfix",
+            "expand_urls" : "true",
     }
     for option, default_value in script_options.iteritems():
          if not wc.config_is_set_plugin(option):
