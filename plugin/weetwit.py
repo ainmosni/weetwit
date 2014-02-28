@@ -174,6 +174,8 @@ def display_cb(data, remaining_calls):
         for tweet in StatusMonitor(status_dir, twitter.api):
 
             tweep_color = wc.color(wc.config_get_plugin("nick_color"))
+            if tweep_color == 'nick_color':
+                tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
             for buf in valid_buffers:
                 screen_name = tweep_color + "@" + tweet.screen_name
                 text = tweet.txt
