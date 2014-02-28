@@ -175,7 +175,7 @@ def display_cb(data, remaining_calls):
 
             tweep_color = wc.color(wc.config_get_plugin("nick_color"))
             for buf in valid_buffers:
-                screen_name = tweep_color + tweet.screen_name
+                screen_name = tweep_color + "@" + tweet.screen_name
                 text = tweet.txt
                 if buf is current_buffer:
                     cur_color = wc.color(wc.config_get_plugin("current_color"))
@@ -186,10 +186,14 @@ def display_cb(data, remaining_calls):
                 hash_color = wc.color(wc.config_get_plugin("hash_color"))
                 text = re.sub(r'(?P<name>@\w+)', r"{}\1{}".format(mention_color,default_color), text)
                 text = re.sub(r'(?P<hash>#\w+)', r"{}\1{}".format(hash_color,default_color), text)
-                output = u"%s\t%s" % \
-                    (screen_name, text)
+
+                output =""
                 if tweet.is_retweet:
-                    output += " (RT by @%s)" % tweet.rtscreen_name
+                    retweeter = "%s@%s" % (mention_color, tweet.rtscreen_name)
+                    output = "%s\tRT %s%s %s" % (retweeter, screen_name, default, text)
+                else:
+                    output = u"%s\t%s" % (screen_name, text)
+
                 output += "\n[#STATUSID: %s]" % tweet.id
 
                 print_to_buffer(buf, output)
