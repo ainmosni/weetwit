@@ -180,11 +180,9 @@ def display_cb(data, remaining_calls):
     try:
         for tweet in StatusMonitor(status_dir, twitter.api):
 
-            tweep_color = wc.color(wc.config_get_plugin("nick_color"))
-            if tweep_color == 'nick_color':
-                tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
+            nick_color = wc.info_get("irc_nick_color", tweet.screen_name)
             for buf in valid_buffers:
-                screen_name = tweep_color + "@" + tweet.screen_name
+                screen_name = nick_color + tweet.screen_name
 
                 text = tweet.txt_unescaped
                 if expand_urls:
@@ -285,8 +283,8 @@ def conversation_cb(data, buffer, args):
         # Now display the conversation.
         print_to_current("%s-------------------" % wc.color("magenta"))
         for tweet in conversation:
-            tweep_color = wc.info_get("irc_nick_color", tweet.screen_name)
-            screen_name = tweep_color + tweet.screen_name
+            nick_color = wc.info_get("irc_nick_color", tweet.screen_name)
+            screen_name = nick_color + tweet.screen_name
             expand_urls = wc.config_string_to_boolean(wc.config_get_plugin("expand_urls"))
             text = tweet.txt_unescaped
             if expand_urls:
@@ -313,8 +311,8 @@ def show_favorites_cb(data, buffer, args):
         print_to_current("%sFAVOURITES\t%s-------------------" %
                 (wc.color("yellow"), wc.color("magenta")))
         for fav in favs:
-            tweep_color = wc.info_get("irc_nick_color", fav.screen_name)
-            screen_name = tweep_color + fav.screen_name
+            nick_color = wc.info_get("irc_nick_color", fav.screen_name)
+            screen_name = nick_color + fav.screen_name
             expand_urls = wc.config_string_to_boolean(wc.config_get_plugin("expand_urls"))
             text = fav.text_unescaped
             if expand_urls:
@@ -700,7 +698,6 @@ if wc.register(SCRIPT_NAME, SCRIPT_AUTHOR, SCRIPT_VERSION, SCRIPT_LICENSE,
             "current_color" : "cyan",
             "timelined_location" : "timelined",
             "trend_woeid" : "1",
-            "nick_color" : "blue",
             "hash_color" : "red",
             "rt_style" : "postfix",
             "expand_urls" : "true",
