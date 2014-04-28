@@ -17,7 +17,7 @@ import re
 from collections import defaultdict
 
 from tweepy.parsers import ModelParser
-from tweepy import OAuthHandler, TweepError
+from tweepy import OAuthHandler, TweepError, Cursor
 
 from libweetwit.wtmodelfactory import wtModelFactory
 from libweetwit.db import DB
@@ -91,7 +91,9 @@ class Twitter(object):
     def get_followed(self):
         """Returns an array of screen_names that you follow."""
         try:
-            followed = [u.screen_name for u in self.api.friends()]
+            followed = []
+            for user in Cursor(self.api.friends).items(200):
+                followed.append(user.screen_name)
         except TweepError as error:
             raise TwitterError("Faled to get followed: %s" % error)
         return followed
