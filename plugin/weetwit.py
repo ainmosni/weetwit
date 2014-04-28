@@ -7,9 +7,10 @@
 #
 # Creation Date: 2012-01-05
 #
-# Last Modified: 2013-06-17 23:48
+# Last Modified: 2014-04-28 15:35
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
+# Modified by: Tor Hveem <tor@hveem.no>
 
 # TODO:
 #   - Add conversation command, to automatically follow a conversation.
@@ -44,7 +45,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.10.0"
+SCRIPT_VERSION      = "0.10.1"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 
@@ -85,7 +86,7 @@ def print_success(message):
 
 def add_to_nicklist(buf, nick):
     """Add nick to the nicklist."""
-    wc.nicklist_add_nick(buf, "", nick, 'bar_fg', '', '', 1)
+    wc.nicklist_add_nick(buf, "", nick, wc.info_get('irc_nick_color_name', nick), '', '', 1)
 
 def remove_from_nicklist(buf, nick):
     """Remove nick from the nicklist."""
@@ -194,10 +195,11 @@ def display_cb(data, remaining_calls):
                     screen_name = cur_color + screen_name
                     text = cur_color + text
 
-                mention_color = wc.color(wc.config_get_plugin("mention_color"))
-                hash_color = wc.color(wc.config_get_plugin("hash_color"))
-                text = re.sub(r'(?P<name>@\w+)', r"{}\1{}".format(mention_color,text_color), text)
-                text = re.sub(r'(?P<hash>#\w+)', r"{}\1{}".format(hash_color,text_color), text)
+                # Use the nick coloring hashing for hash colors so hashes get consistant and different coloring
+                def hashcolor(m):
+                    s = m.group(0)
+                    return "{}{}{}".format(wc.info_get("irc_nick_color", s), s, text_color)
+                text = re.sub(r'(?P<hash>#\w+)', hashcolor, text)
 
                 retweet_style = wc.config_get_plugin("rt_style")
 
