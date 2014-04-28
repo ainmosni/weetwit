@@ -626,18 +626,21 @@ def setup_timeline(timelined, followed=False, search=False):
     global buffers
     if not search:
         name = "timeline"
+        short_name = "twitter"
         title = "%s's timeline" % user.screen_name
         prefix = "__TIMELINE"
         search = False
         buf_cb = "tweet_cb"
     else:
         name = search
+        short_name = search
         title = "Twitter search for %s" % search
         prefix = md5(search).hexdigest()
         buf_cb = "tweet_cb"
     buf = wc.buffer_new(name, buf_cb, "", "stop_timelined", prefix)
     # Some naming
     wc.buffer_set(buf, "title", title)
+    wc.buffer_set(buf, "short_name", short_name)
 
     # We want mentions to highlight.
     wc.buffer_set(buf, "highlight_words", user.screen_name)
