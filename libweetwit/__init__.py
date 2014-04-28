@@ -11,7 +11,7 @@
 #
 # Created By: Daniël Franke <daniel@ams-sec.org>
 
-__version__ = '0.10.0'
+__version__ = '0.10.2'
 __author__ = 'Daniël Franke'
 __license__ = 'BSD'
 
