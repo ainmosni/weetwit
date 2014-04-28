@@ -120,6 +120,7 @@ def is_attached():
     """
     Check if screen/tmux is attached.
     """
+    # Code generously donated by Tor Hveem, relicensed to BSD with permission.
     sock = False
     if 'STY' in os.environ.keys():
         # We're in screen
