@@ -10,6 +10,9 @@ inclusion in weetwit. Namely these functions:
 * utcdt_to_lts()
 * add_to_nicklist()
 * remove_from_nicklist()
+* is_attached()
+
+Multiple code commits, mostly to make the buffer play nicer with nick colours.
 
 Espen Fjellvær Olsen (espenfjo on github.com)
 +++++++++++++++++++++++++++++++++++++++++++++
