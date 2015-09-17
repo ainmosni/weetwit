@@ -5,10 +5,6 @@
 #
 # Description: Plugin to show latest tweets in weechat.
 #
-# Creation Date: 2012-01-05
-#
-# Last Modified: 2014-04-28 15:35
-#
 # Created By: Daniël Franke <daniel@ams-sec.org>
 # Modified by: Tor Hveem <tor@hveem.no>
 
@@ -45,7 +41,7 @@ except ImportError:
 
 SCRIPT_NAME         = "weetwit"
 SCRIPT_AUTHOR       = "Daniël Franke <daniel@ams-sec.org>"
-SCRIPT_VERSION      = "0.10.2"
+SCRIPT_VERSION      = "0.10.3"
 SCRIPT_LICENSE      = "BSD"
 SCRIPT_DESC         = "Full twitter suite for Weechat."
 

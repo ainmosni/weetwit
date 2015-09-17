@@ -4,12 +4,6 @@
 # File Name: tweet.py
 #
 # Description: An enhanced status class.
-#
-# Creation Date: 2012-02-21
-#
-# Last Modified: 2012-04-17 13:04
-#
-# Created By: Daniël Franke <daniel@ams-sec.org>
 
 from tweepy.models import Status
 
