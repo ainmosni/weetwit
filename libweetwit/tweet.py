@@ -45,6 +45,8 @@ class Tweet(Status):
                     )
         rtname = status.user.name
         rtscreen_name = status.user.screen_name
+        url = 'https://twitter.com/{user}/status/{id}'.format(user=screen_name,
+                                                              id=tid)
         setattr(status, 'tid', tid)
         setattr(status, 'txt_unescaped', unescape(txt))
         setattr(status, 'name', unescape(name))
@@ -55,6 +57,7 @@ class Tweet(Status):
         setattr(status, 'txt_unescaped', status.txt_unescaped)
         setattr(status, 'txt', status.expand_urls(status.txt_unescaped))
         setattr(status, 'source', unescape(status.source))
+        setattr(status, 'url', url)
         return status
 
     def unfavorite(self):

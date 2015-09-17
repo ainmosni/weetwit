@@ -361,8 +361,8 @@ def tweet_share_cb(data, buffer, args):
     text = tweet.txt_unescaped
     if expand_urls:
         text = tweet.txt
-    message = '<@%s> %s [https://twitter.com/#!/%s/status/%s]' % \
-        (tweet.screen_name, text, tweet.screen_name, tweet.tid)
+    message = '<@%s> %s [%s]' % \
+        (tweet.screen_name, text, tweet.url)
     wc.command(wc.current_buffer(), '/say %s' % message)
     return wc.WEECHAT_RC_OK
 
@@ -383,7 +383,7 @@ def retweet_cb(data, buffer, args):
     try:
         if len(arg_list) > 1:
             msg = " ".join(arg_list[1:])
-            msg += " RT @%s: %s" % (tweet.screen_name, tweet.txt_unescaped)
+            msg += " {}".format(tweet.url)
             output = twitter.update_status(msg)
         else:
             tweet.retweet()
