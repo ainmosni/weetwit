@@ -17,12 +17,11 @@ import re
 from collections import defaultdict
 
 from tweepy.parsers import ModelParser
-from tweepy import OAuthHandler, TweepError, Cursor
+from tweepy import OAuthHandler, TweepError, Cursor, API
 
 from libweetwit.wtmodelfactory import wtModelFactory
 from libweetwit.db import DB
 from libweetwit.exceptions import TwitterError
-from libweetwit.api import weetwitAPI as API
 
 
 class Twitter(object):
@@ -57,7 +56,7 @@ class Twitter(object):
         """Posts text to twitter."""
         if self.__is_sane(message):
             try:
-                self.api.update_status(message, in_reply_to_status_id=reply_id)
+                self.api.update_status(status=message, in_reply_to_status_id=reply_id)
             except TweepError as error:
                 raise TwitterError("Failed to post status: %s" % error)
             return "Status updated."

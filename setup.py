@@ -29,7 +29,7 @@ setup(
     url='https://github.com/ainmosni/weetwit',
     description='Twitter suite for Weechat.',
     long_description=read("README.rst"),
-    install_requires=["tweepy>=2.0"],
+    install_requires=["tweepy>=3.4.0"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console :: Curses",
