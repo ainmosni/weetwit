@@ -2,6 +2,8 @@
 weetwit: A twitter suite for weechat
 ====================================
 
+**As everyone already noticed, development on this stopped quite a while ago.**
+
 *author*
     Daniël Franke (@ainmosni) <daniel[at]ams-sec[dot]org>
 
